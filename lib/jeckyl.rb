@@ -15,7 +15,7 @@
 #
 #
 
-class Jeckyl
+class Jeckyl < Hash
 
   # set this to false if you want unknown methods to be turned into key value pairs regardless
   @@strict = true
@@ -28,7 +28,10 @@ class Jeckyl
   # opts is an optional hash of defaul key value pairs
   #
   def initialize(config_file, opts={})
-    @values = opts
+    super
+    opts.each_pair do |key, value|
+      self[key] = value
+    end
     self.instance_eval(File.read(config_file), config_file)
   rescue SyntaxError => err
     raise ConfigSyntaxError, err.message
@@ -55,13 +58,13 @@ class Jeckyl
 
   # set the current parameter
   def set_param(value)
-    @values[@symbol] = value
+    self[@symbol] = value
   end
 
   # access parameters that have been set.
-  def [](key)
-    @values[key]
-  end
+#  def [](key)
+#    @values[key]
+#  end
 
 
 private
