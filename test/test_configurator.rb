@@ -15,25 +15,37 @@ require 'jeckyl'
 
 class TestJeckyl < Jeckyl
   
-  def log_dir(path)
-    set_writable_dir(:log_dir, path)
+  def set_log_dir(path)
+    set_param(path) if is_writable_dir?(path)
   end
 
-  def log_level(symb)
+  def set_log_level(symb)
     symbol_set = [:system, :verbose, :debug]
-    select_symbol_set(:log_level, symb, symbol_set)
+    set_param(symb) if is_member_of?(symb, symbol_set)
   end
 
-  def log_rotation(val)
-    set_scalar_range(:log_rotation, val, 0, 20)
+  def set_log_rotation(val)
+    set_param(val) if is_of_type?(val, Integer) && is_in_range?(val, 0, 20)
   end
 
-  def threshold(val)
-    set_scalar_range(:threshold, val, 0.0, 10.0)
+  def set_threshold(val)
+    set_param(val) if is_in_range?(val, 0.0, 10.0)
   end
 
-  def pi(val)
-    set_float(:pi, val)
+  def set_pi(val)
+    set_param(val) if is_of_type?(val, Float)
+  end
+
+  def set_sieve(ary)
+    set_param(ary) if is_array_of?(ary, Integer)
+  end
+
+  def set_options(opts)
+    set_param(opts) if is_hash?(opts)
+  end
+
+  def set_email(email)
+    set_param(email) if matches?(email, /^[a-z]+\@[a-z][a-z\-\.]+[a-z]$/)
   end
 
 end

@@ -11,3 +11,11 @@ log_rotation 5
 threshold 5.6
 
 pi 3.14592
+
+sieve [2, 5, 7, 10, 15]
+
+my_opts = {:peter=>37, :paul=>40, :birds=>true}
+
+options my_opts
+
+email "robert@osburn-sharp.ath.cx"

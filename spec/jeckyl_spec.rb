@@ -8,9 +8,11 @@ describe "Jeckyl" do
   it "should create a simple config" do
     conf_file = conf_path + '/jeckyl'
     conf = TestJeckyl.new(conf_file)
+    puts "    #{conf.inspect}"
     conf[:log_dir].should match(/jelly\/log$/)
     conf[:log_level].should == :verbose
     conf[:log_rotation].should == 5
+    conf[:email].should == "robert@osburn-sharp.ath.cx"
   end
 
   it "should fail if the config file does not exist" do

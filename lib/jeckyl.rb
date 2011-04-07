@@ -41,11 +41,21 @@ class Jeckyl
   # if @@strict then it will raise an exception. Otherwise it will create a key value pair
   #
   def method_missing(symb, parameter)
+    @symbol = symb
+    method_to_call = ('set_' + symb.to_s).to_sym
+    set_method = self.method(method_to_call)
+    set_method.call(parameter)
+  rescue NameError
     if @@strict then
       raise UnknownParameter, format_error(symb, parameter, "Unknown parameter")
     else
       @values[symb] = parameter
     end
+  end
+
+  # set the current parameter
+  def set_param(value)
+    @values[@symbol] = value
   end
 
   # access parameters that have been set.
@@ -58,64 +68,115 @@ private
 
   # the following are all helper methods to parse values and raise exceptions if the values are not correct
 
-  # file helpers
+  # file helpers - meanings should be apparent
 
-  def set_writable_dir(key, path)
+  def is_writable_dir?(path)
     if FileTest.directory?(path) && FileTest.writable?(path) then
-      @values[key] = path
+      true
     else
-      raise_config_error(key, path, "directory is not writable or does not exist")
+      raise_config_error(path, "directory is not writable or does not exist")
     end
   end
 
-  def set_file_path(key, path)
+  def is_file_path?(key, path)
     if FileTest.exists?(path) then
-      @values[key] = path
+      true
     else
-      raise_config_error(key, path, "file does not exist")
+      raise_config_error(path, "file does not exist")
     end
   end
 
   # simple type helpers
 
-  # generic method to be used by specific methods
-  def matches_scalar(key, val, lower, upper=nil)
-    num_class = lower.class == Class ? lower : lower.class
-    unless val.kind_of?(num_class) then
-      raise_config_error(key, val, "value is not of required type: #{num_class}")
+  def is_of_type?(val, type)
+    if val.kind_of?(type) then
+      true
+    else
+      raise_config_error(val, "value is not of required type: #{type}")
     end
-    if upper then
-      num_class = (lower .. upper)
+  end
+  
+  def is_in_range?(val, lower, upper)
+    raise_syntax_error("#{lower.to_s}..#{upper.to_s} is not a range") unless (lower .. upper).kind_of?(Range)
+    if (lower .. upper) === val then
+      true
+    else
+      raise_config_error(val, "value is not an within required range: #{lower.to_s}..#{upper.to_s}")
     end
-    unless num_class === val then
-      raise_config_error(key, val, "value is not an within required range: #{num_class}")
+  end
+
+  # compound objects
+
+  def is_array?(ary)
+    if ary.kind_of?(Array) then
+      true
+    else
+      raise_config_error(ary, "value is not an Array")
     end
-    return true
   end
 
-  def set_integer(key, val)
-    @values[key] = val if matches_scalar(key, val, Integer)
+  def is_array_of?(ary, type)
+    raise_syntax_error("Provided a value that is a type: #{type.to_s}") unless type.class == Class
+    if ary.kind_of?(Array) then
+      ary.each do |element|
+        unless element.kind_of?(type) then
+          raise_config_error(element, "element of array is not of type #{type}")
+        end
+      end
+      return true
+    else
+      raise_config_error(ary, "value is not an Array")
+    end
   end
 
-  def set_scalar_range(key, val, lower, upper)
-    @values[key] = val if matches_scalar(key, val, lower, upper)
+  def is_hash?(hsh)
+    if hsh.kind_of?(Hash) then
+      true
+    else
+      raise_config_error(hsh, "value is not a Hash")
+    end
   end
 
-  def set_float(key, val)
-    @values[key] = val if matches_scalar(key, val, Float)
+  # strings and text and stuff
+
+  def is_a_string?(str)
+    if str.kind_of?(String) then
+      true
+    else
+      raise_config_error(str, "is not a string")
+    end
   end
 
-  def select_symbol_set(key, symb, set)
+  def matches?(str, pattern)
+    raise_syntax_error("Attempt to pattern match with out a Regexp") unless pattern.kind_of?(Regexp)
+    if pattern =~ str then
+      true
+    else
+      raise_config_error(str, "does not match required pattern: #{pattern.source}")
+    end
+  end
+
+  # set membership - set is an array of members
+
+  def is_member_of?(symb, set)
+    raise_syntax_error("Sets to test membership must be arrays") unless set.kind_of?(Array)
     if set.include?(symb) then
-      @values[key] = symb
+      true
+    else
+      raise_config_error(symb, "is not a member of: #{set.join(', ')}")
     end
   end
 
 
+  # really private helpers that should not be needed unless the parser method
+  # is custom
 
+  def raise_config_error(value, message)
+    raise ConfigError, format_error(@symbol, value, message), caller
+  end
 
-  def raise_config_error(key, value, message)
-    raise ConfigError, format_error(key, value, message), caller
+  def raise_syntax_error(message)
+    raise ConfigSyntaxError, message, caller
   end
 
   def format_error(key, value, message)
