@@ -16,40 +16,66 @@ require 'jeckyl'
 class TestJeckyl < Jeckyl
   
   def set_log_dir(path)
-    set_param(path) if is_writable_dir?(path)
+    is_writable_dir?(path)
   end
 
-  def key_file(path)
-    set_param(path) if is_readable_file?(path)
+  def set_key_file(path)
+    is_readable_file?(path)
   end
 
   def set_log_level(symb)
     symbol_set = [:system, :verbose, :debug]
-    set_param(symb) if is_member_of?(symb, symbol_set)
+    is_member_of?(symb, symbol_set)
   end
 
   def set_log_rotation(val)
-    set_param(val) if is_of_type?(val, Integer) && is_in_range?(val, 0, 20)
+    is_of_type?(val, Integer) && is_in_range?(val, 0, 20)
   end
 
   def set_threshold(val)
-    set_param(val) if is_in_range?(val, 0.0, 10.0)
+    # make sure it is a number
+    is_of_type?(val, Numeric)
+    # now make sure it is a float
+    @parameter = val.to_f
+    is_in_range?(val, 0.0, 10.0)
   end
 
   def set_pi(val)
-    set_param(val) if is_of_type?(val, Float)
+    is_of_type?(val, Float)
   end
 
+  def set_debug(bool)
+    is_boolean?(bool)
+  end
+
+  def set_flag(flag)
+    @parameter = to_boolean(flag)
+  end
+
+  def set_collection(ary)
+    is_array?(ary)
+  end
+  
   def set_sieve(ary)
-    set_param(ary) if is_array_of?(ary, Integer)
+    is_array_of?(ary, Integer)
   end
 
   def set_options(opts)
-    set_param(opts) if is_hash?(opts)
+    is_hash?(opts)
   end
 
   def set_email(email)
-    set_param(email) if matches?(email, /^[a-z]+\@[a-z][a-z\-\.]+[a-z]$/)
+    matches?(email, /^[a-z]+\@[a-z][a-z\-\.]+[a-z]$/)
+  end
+
+  def set_invalid_set(member)
+    invalid_set = {:one=>1, :two=>2, :three=>3}
+    is_member_of?(member, invalid_set)
+  end
+
+  def set_invalid_pattern(email)
+    pattern = "email"
+    matches?(email, pattern)
   end
 
 end

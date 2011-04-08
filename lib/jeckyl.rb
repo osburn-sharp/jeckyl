@@ -22,6 +22,8 @@ class Jeckyl < Hash
   # set this to false if you want unknown methods to be turned into key value pairs regardless
   @@strict = true
 
+  @@debug = false
+
   # create a configuration object
   #
   # The config_file is a string path to a ruby config file that will be evaluated and converted into
@@ -52,11 +54,16 @@ class Jeckyl < Hash
   def method_missing(symb, parameter)
 
     @last_symbol = symb
+    @parameter = parameter
     method_to_call = ('set_' + symb.to_s).to_sym
     set_method = self.method(method_to_call)
     set_method.call(parameter)
 
+    # everything must be OK, so
+    self[@last_symbol] = @parameter
+
   rescue NameError
+    raise if @@debug
     # no parser method defined.
     if @@strict then
       # not tolerable
@@ -69,9 +76,9 @@ class Jeckyl < Hash
   end
 
   # set the current parameter, a convenience method that uses @last_symbol
-  def set_param(value)
-    self[@last_symbol] = value
-  end
+#  def set_param(value)
+#    self[@last_symbol] = value
+#  end
 
   # accept undefined parameters and add them to the hash
   def self.relax
@@ -82,6 +89,10 @@ class Jeckyl < Hash
   # but useful perhaps for testing
   def self.strict
     @@strict = true
+  end
+
+  def self.debug(val)
+    @@debug = (val)
   end
 
 private
@@ -98,7 +109,7 @@ private
     end
   end
 
-  def is_readable_file?(key, path)
+  def is_readable_file?(path)
     if FileTest.readable?(path) then
       true
     else
@@ -121,7 +132,7 @@ private
     if (lower .. upper) === val then
       true
     else
-      raise_config_error(val, "value is not an within required range: #{lower.to_s}..#{upper.to_s}")
+      raise_config_error(val, "value is not within required range: #{lower.to_s}..#{upper.to_s}")
     end
   end
 
@@ -129,7 +140,7 @@ private
   # boolean helpers
 
   def is_boolean?(val)
-    if val.kind_of?(Boolean) then
+    if val.kind_of?(TrueClass) || val.kind_of?(FalseClass) then
       true
     else
       raise_config_error(val, "Value is not a Boolean")
@@ -165,7 +176,7 @@ private
     if ary.kind_of?(Array) then
       ary.each do |element|
         unless element.kind_of?(type) then
-          raise_config_error(element, "element of array is not of type #{type}")
+          raise_config_error(element, "element of array is not of type: #{type}")
         end
       end
       return true
@@ -188,12 +199,13 @@ private
     if str.kind_of?(String) then
       true
     else
-      raise_config_error(str, "is not a string")
+      raise_config_error(str.to_s, "is not a String")
     end
   end
 
   def matches?(str, pattern)
-    raise_syntax_error("Attempt to pattern match with out a Regexp") unless pattern.kind_of?(Regexp)
+    raise_syntax_error("Attempt to pattern match without a Regexp") unless pattern.kind_of?(Regexp)
+    is_a_string?(str)
     if pattern =~ str then
       true
     else
