@@ -2,7 +2,7 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 require 'jeckyl/errors'
 require File.expand_path(File.dirname(__FILE__) + '/../test/test_configurator')
 
-conf_path = File.expand_path(File.dirname(__FILE__) + '/../conf.d')
+conf_path = File.expand_path(File.dirname(__FILE__) + '/../test/conf.d')
 
 describe "Jeckyl" do
 
