@@ -5,19 +5,17 @@ require File.expand_path(File.dirname(__FILE__) + '/../test/test_configurator')
 conf_path = File.expand_path(File.dirname(__FILE__) + '/../conf.d')
 
 describe "Jeckyl" do
+
+  # general tests
+
   it "should create a simple config" do
     conf_file = conf_path + '/jeckyl'
     conf = TestJeckyl.new(conf_file)
-    puts "    #{conf.inspect}"
     conf[:log_dir].should match(/jelly\/log$/)
     conf[:log_level].should == :verbose
     conf[:log_rotation].should == 5
     conf[:email].should == "robert@osburn-sharp.ath.cx"
-  end
-
-  it "should fail if the config file does not exist" do
-    conf_file = conf_path + "/never/likely/to/be/there"
-    lambda{conf = TestJeckyl.new(conf_file)}.should raise_error(Jeckyl::ConfigFileMissing, conf_file)
+    conf.has_key?(:sieve).should be_true
   end
 
   it "should be easy to set simple defaults" do
@@ -27,13 +25,15 @@ describe "Jeckyl" do
     conf[:master_key].should == 'ABCDEF'
   end
 
-  it "should raise an exception if a file parameter does not exist" do
-    conf_file = conf_path + '/bad_filename'
-    lambda{conf = TestJeckyl.new(conf_file)}.should raise_error(Jeckyl::ConfigError, /^\[log_dir\]:/)
+  # general exceptions
+
+  it "should fail if the config file does not exist" do
+    conf_file = conf_path + "/never/likely/to/be/there"
+    lambda{conf = TestJeckyl.new(conf_file)}.should raise_error(Jeckyl::ConfigFileMissing, conf_file)
   end
 
-  it "should raise an exception if a dir is not writable" do
-    conf_file = conf_path + '/unwritable_dir'
+  it "should raise an exception if a file parameter does not exist" do
+    conf_file = conf_path + '/bad_filename'
     lambda{conf = TestJeckyl.new(conf_file)}.should raise_error(Jeckyl::ConfigError, /^\[log_dir\]:/)
   end
 
@@ -47,9 +47,38 @@ describe "Jeckyl" do
     lambda{conf = TestJeckyl.new(conf_file)}.should raise_error(Jeckyl::UnknownParameter)
   end
 
-  it "should raise an exception if there is an invalid integer" do
-    conf_file = conf_path + '/wrong_integer'
-    lambda{conf = TestJeckyl.new(conf_file)}.should raise_error(Jeckyl::ConfigError, /^\[log_rotation\]:.*value is not an within required range: 0..20$/)
+  # test parameters
+
+  describe "File Parameters" do
+
+    it "should raise an exception if a dir is not writable" do
+      conf_file = conf_path + '/unwritable_dir'
+      lambda{conf = TestJeckyl.new(conf_file)}.should raise_error(Jeckyl::ConfigError, /^\[log_dir\]:/)
+    end
+
+    it "should raise an exception if a dir is not writable" do
+      conf_file = conf_path + '/no_such_file'
+      lambda{conf = TestJeckyl.new(conf_file)}.should raise_error(Jeckyl::ConfigError, /^\[key_file\]:/)
+    end
+
+
+  end
+
+  describe "Integer Parameters" do
+
+    it "should raise an exception if there is an invalid integer" do
+      conf_file = conf_path + '/wrong_integer'
+      lambda{conf = TestJeckyl.new(conf_file)}.should raise_error(Jeckyl::ConfigError, /^\[log_rotation\]:.*value is not an within required range: 0..20$/)
+    end
+
+  end
+
+  # leave at the end or you need to re-strict Jeckyl.
+  it "should load any parameter if its not being strict" do
+    conf_file = conf_path + '/sloppy_params'
+    TestJeckyl.relax
+    conf = TestJeckyl.new(conf_file)
+    conf[:my_age].should == 50
   end
 
 end

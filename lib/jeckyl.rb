@@ -11,10 +11,12 @@
 #
 # == JECKYL
 #
-# === Jumpin' Ermine's Configurator for Kwit and easY Linux services
-#
-#
 
+#
+# main configurator class. You can either create an instance of this class and use it in
+# relaxed mode, or create a subclass in which to define various parsing methods. See README
+# for more details of usage.
+#
 class Jeckyl < Hash
 
   # set this to false if you want unknown methods to be turned into key value pairs regardless
@@ -25,10 +27,11 @@ class Jeckyl < Hash
   # The config_file is a string path to a ruby config file that will be evaluated and converted into
   # key value pairs
   #
-  # opts is an optional hash of defaul key value pairs
+  # opts is an optional hash of default key value pairs used to fill the hash before the config_file is
+  # evaluated. Any values defined by the config file will overwrite these defaults.
   #
   def initialize(config_file, opts={})
-    super
+    super()
     opts.each_pair do |key, value|
       self[key] = value
     end
@@ -43,29 +46,43 @@ class Jeckyl < Hash
   # decides what to do with parameters that have not been defined.
   # if @@strict then it will raise an exception. Otherwise it will create a key value pair
   #
+  # This method also remembers the method name as the key to prevent the parsers etc from
+  # having to carry this around just to do things like report on it.
+  #
   def method_missing(symb, parameter)
-    @symbol = symb
+
+    @last_symbol = symb
     method_to_call = ('set_' + symb.to_s).to_sym
     set_method = self.method(method_to_call)
     set_method.call(parameter)
+
   rescue NameError
+    # no parser method defined.
     if @@strict then
+      # not tolerable
       raise UnknownParameter, format_error(symb, parameter, "Unknown parameter")
     else
-      @values[symb] = parameter
+      # feeling relaxed, so lets store it anyway.
+      self[symb] = parameter
     end
+    
   end
 
-  # set the current parameter
+  # set the current parameter, a convenience method that uses @last_symbol
   def set_param(value)
-    self[@symbol] = value
+    self[@last_symbol] = value
   end
 
-  # access parameters that have been set.
-#  def [](key)
-#    @values[key]
-#  end
+  # accept undefined parameters and add them to the hash
+  def self.relax
+    @@strict = false
+  end
 
+  # reset to default strict behaviour. Not really needed (unless there are multiple files)
+  # but useful perhaps for testing
+  def self.strict
+    @@strict = true
+  end
 
 private
 
@@ -81,8 +98,8 @@ private
     end
   end
 
-  def is_file_path?(key, path)
-    if FileTest.exists?(path) then
+  def is_readable_file?(key, path)
+    if FileTest.readable?(path) then
       true
     else
       raise_config_error(path, "file does not exist")
@@ -107,6 +124,31 @@ private
       raise_config_error(val, "value is not an within required range: #{lower.to_s}..#{upper.to_s}")
     end
   end
+
+
+  # boolean helpers
+
+  def is_boolean?(val)
+    if val.kind_of?(Boolean) then
+      true
+    else
+      raise_config_error(val, "Value is not a Boolean")
+    end
+  end
+
+  # accept yes/no, on/off, etc
+  def to_boolean(val)
+    val = val.downcase if val.kind_of?(String)
+    case val
+    when true, "yes", "on", 1
+      true
+    when false, "no", "off", 0
+      false
+    else
+      raise_config_error(val, "Cannot convert to Boolean")
+    end
+  end
+
 
   # compound objects
 
@@ -175,7 +217,7 @@ private
   # is custom
 
   def raise_config_error(value, message)
-    raise ConfigError, format_error(@symbol, value, message), caller
+    raise ConfigError, format_error(@last_symbol, value, message), caller
   end
 
   def raise_syntax_error(message)

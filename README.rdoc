@@ -1,16 +1,43 @@
 = jeckyl
 
-Description goes here.
+== Jumpin' Ermine's Configurator for Kwit and easY Linux services
+
+The Configurator creates a hash object that has all of the methods of Hash, but
+also loads and parses specific values from the configuration file!
+
+=== Usage
+
+Create a subclass of Jeckyl in which to define methods to parse each of your
+parameters. For each parameter in the config file there needs to be a method with the
+same name but prefixed with "set_". For example, if there is a parameter "log_dir" then there
+needs to be a method called "set_log_dir".
+
+Within each method you can run any of the helpers below to check that the parameter
+given is valid. Each helper will raise appropriate exceptions if the parameter does not
+match. If it does, the helper generally returns true, but NOT ALWAYS. If the helper parses
+the parameter OK, then you can set the parameter in the hash by just calling set_param with
+the validated value. Jeckyl remembers the parameter name itself.
+
+The successfully returned config hash contains key-value pairs where the keys are the
+parameter names as symbols and the values are the objects passed in. This means that
+along with the usual simple parameters such as filenames, numbers etc, you can construct
+any valid Ruby object and pass that in as a parameter. Wonderful!
+
+And because Jeckyl is itself a subclass of Hash, the resulting object behaves just
+like a normal hash would.
+
+If you are lazy and cannot be bothered with defining lots of methods, you can relax the parsing
+and even use Jeckyl as-is. To relax, call the class method, "relax". Then any parameter value pairs in
+the config file will be converted to key-value pairs in the hash without any cheks at all. Great!
+
+=== Testing
+
+There is an rspec test file to test the whole thing. It uses a test subclass in "../test" and various config files
+in "../conf.d".
 
 == Note on Patches/Pull Requests
- 
-* Fork the project.
-* Make your feature addition or bug fix.
-* Add tests for it. This is important so I don't break it in a
-  future version unintentionally.
-* Commit, do not mess with rakefile, version, or history.
-  (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull)
-* Send me a pull request. Bonus points for topic branches.
+
+jeckyl-0.0.1 - first attempt
 
 == Copyright
 

@@ -19,6 +19,10 @@ class TestJeckyl < Jeckyl
     set_param(path) if is_writable_dir?(path)
   end
 
+  def key_file(path)
+    set_param(path) if is_readable_file?(path)
+  end
+
   def set_log_level(symb)
     symbol_set = [:system, :verbose, :debug]
     set_param(symb) if is_member_of?(symb, symbol_set)
