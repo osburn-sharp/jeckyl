@@ -20,10 +20,15 @@ describe "Jeckyl" do
   end
 
   it "should be easy to set simple defaults" do
-    conf_file = conf_path + '/jeckyl'
-    defaults = {:master_key => 'ABCDEF'}
+    conf_file = conf_path + '/a_few_params'
+    defaults = {:master_key => 'ABCDEF', :sieve=>[3,4,5]}
     conf = TestJeckyl.new(conf_file, defaults)
     conf[:master_key].should == 'ABCDEF'
+    conf[:log_level].should == :debug
+    conf[:log_dir].should == '/tmp'
+    conf[:key_file].should be_nil
+    conf[:pi].should == 3.14
+    conf[:sieve].should == [3,4,5]
   end
 
   # general exceptions

@@ -1,0 +1,1 @@
+No errors found in: /home/robert/dev/projects/jeckyl/test/conf.d/jeckyl

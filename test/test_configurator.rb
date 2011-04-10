@@ -15,67 +15,74 @@ require 'jeckyl'
 
 class TestJeckyl < Jeckyl
   
-  def set_log_dir(path)
-    is_writable_dir?(path)
+  def set_log_dir(path='/tmp')
+    comment "Location to write log files to"
+    a_writable_dir(path)
   end
 
-  def set_key_file(path)
-    is_readable_file?(path)
+  def set_key_file(path=nil)
+    comment "key file to be used to check secure commands"
+    a_readable_file(path)
   end
 
-  def set_log_level(symb)
+  def set_log_level(symb=:verbose)
+    comment "Log level can one of the following:",
+       "",
+       " * :system - log all important messages and use syslog",
+       " * :verbose - be more generous with logging to help resolve problems"
     symbol_set = [:system, :verbose, :debug]
-    is_member_of?(symb, symbol_set)
+    a_member_of(symb, symbol_set)
   end
 
-  def set_log_rotation(val)
-    is_of_type?(val, Integer) && is_in_range?(val, 0, 20)
+  def set_log_rotation(val=5)
+    a_type_of(val, Integer)
+    in_range(val, 0, 20)
   end
 
-  def set_threshold(val)
+  def set_threshold(val=5.0)
     # make sure it is a number
-    is_of_type?(val, Numeric)
+    a_type_of(val, Numeric)
     # now make sure it is a float
-    @parameter = val.to_f
-    is_in_range?(val, 0.0, 10.0)
+    in_range(val.to_f, 0.0, 10.0)
+
   end
 
-  def set_pi(val)
-    is_of_type?(val, Float)
+  def set_pi(val=3.14)
+    a_type_of(val, Float)
   end
 
-  def set_debug(bool)
-    is_boolean?(bool)
+  def set_debug(bool=false)
+    a_boolean(bool)
   end
 
-  def set_flag(flag)
-    @parameter = to_boolean(flag)
+  def set_flag(flag="on")
+    a_flag(flag)
   end
 
-  def set_collection(ary)
-    is_array?(ary)
+  def set_collection(ary=[])
+    an_array(ary)
   end
   
-  def set_sieve(ary)
-    is_array_of?(ary, Integer)
+  def set_sieve(ary=[1,2,3])
+    an_array_of(ary, Integer)
   end
 
-  def set_options(opts)
-    is_hash?(opts)
+  def set_options(opts={})
+    a_hash(opts)
   end
 
-  def set_email(email)
-    matches?(email, /^[a-z]+\@[a-z][a-z\-\.]+[a-z]$/)
+  def set_email(email="me@home.org.uk")
+    a_matching_string(email, /^[a-z]+\@[a-z][a-z\-\.]+[a-z]$/)
   end
 
-  def set_invalid_set(member)
+  def set_invalid_set(member=1)
     invalid_set = {:one=>1, :two=>2, :three=>3}
-    is_member_of?(member, invalid_set)
+    a_member_of(member, invalid_set)
   end
 
-  def set_invalid_pattern(email)
+  def set_invalid_pattern(email="me@work.org.uk")
     pattern = "email"
-    matches?(email, pattern)
+    a_matching_string(email, pattern)
   end
 
 end

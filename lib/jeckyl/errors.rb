@@ -29,4 +29,7 @@ class Jeckyl
   # the given config parameter is not known
   class UnknownParameter < JeckylError; end
 
+  # could not open the specified report file
+  class ReportFileError < JeckylError; end
+
 end

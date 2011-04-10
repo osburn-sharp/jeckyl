@@ -3,7 +3,7 @@
 #
 
 # should be a writable directory
-log_dir "./test"
+log_dir "jeckyl/test"
 
 #should be a valid symbol
 log_level :verbose

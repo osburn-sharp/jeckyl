@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+  "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
+
+  <title>RDoc Documentation</title>
+
+  <link type="text/css" media="screen" href="rdoc.css" rel="stylesheet" />
+
+  <script src="js/jquery.js" type="text/javascript" charset="utf-8"></script>
+  <script src="js/thickbox-compressed.js" type="text/javascript" charset="utf-8"></script>
+  <script src="js/quicksearch.js" type="text/javascript" charset="utf-8"></script>
+  <script src="js/darkfish.js" type="text/javascript" charset="utf-8"></script>
+
+</head>
+<body class="indexpage">
+
+  
+  <h1>RDoc Documentation</h1>
+
+  
+  <div id="main">
+    
+
+<h2>Jumpin’ Ermine’s Configurator for Kwit and easY Linux services</h2>
+
+<p>The Configurator creates a hash object that has all of the methods of Hash,
+but also loads and parses specific values from the configuration file!</p>
+
+<h3>Usage</h3>
+
+<p>Create a subclass of <a href="Jeckyl.html">Jeckyl</a> in which to define
+methods to parse each of your parameters. For each parameter in the config
+file there needs to be a method with the same name but prefixed with
+“set_”. For example, if there is a parameter “log_dir” then there
+needs to be a method called “set_log_dir”.</p>
+
+<p>Within each method you can run any of the helpers below to check that the
+parameter given is valid. Each helper will raise appropriate exceptions if
+the parameter does not match. If it does, the helper generally returns
+true, but NOT ALWAYS. If the helper parses the parameter OK, then you can
+set the parameter in the hash by just calling set_param with the validated
+value. <a href="Jeckyl.html">Jeckyl</a> remembers the parameter name
+itself.</p>
+
+<p>The successfully returned config hash contains key-value pairs where the
+keys are the parameter names as symbols and the values are the objects
+passed in. This means that along with the usual simple parameters such as
+filenames, numbers etc, you can construct any valid Ruby object and pass
+that in as a parameter. Wonderful!</p>
+
+<p>And because <a href="Jeckyl.html">Jeckyl</a> is itself a subclass of Hash,
+the resulting object behaves just like a normal hash would.</p>
+
+<p>If you are lazy and cannot be bothered with defining lots of methods, you
+can relax the parsing and even use <a href="Jeckyl.html">Jeckyl</a> as-is.
+To relax, call the class method, “relax”. Then any parameter value
+pairs in the config file will be converted to key-value pairs in the hash
+without any cheks at all. Great!</p>
+
+<h3>Testing</h3>
+
+<p>There is an rspec test file to test the whole thing. It uses a test
+subclass in “../test” and various config files in “../conf.d”.</p>
+
+<h2>Note on Patches/Pull Requests</h2>
+
+<p>jeckyl-0.0.1 - first attempt</p>
+
+<h2>Copyright</h2>
+
+<p>Copyright © 2011 Robert Sharp. See LICENSE for details.</p>
+
+  </div>
+  
+
+  
+  
+  <h2>Files</h2>
+  <ul>
+    
+      <li class="file"><a href="LICENCE.html">LICENCE</a></li>
+    
+      <li class="file"><a href="README_rdoc.html">README.rdoc</a></li>
+    
+  </ul>
+  
+
+  <h2 id="classes">Classes/Modules</h2>
+  <ul>
+    
+    <li class="class"><a href="Jeckyl.html">Jeckyl</a></li>
+    
+    <li class="class"><a href="Jeckyl/ConfigError.html">Jeckyl::ConfigError</a></li>
+    
+    <li class="class"><a href="Jeckyl/ConfigFileMissing.html">Jeckyl::ConfigFileMissing</a></li>
+    
+    <li class="class"><a href="Jeckyl/ConfigSyntaxError.html">Jeckyl::ConfigSyntaxError</a></li>
+    
+    <li class="class"><a href="Jeckyl/JeckylError.html">Jeckyl::JeckylError</a></li>
+    
+    <li class="class"><a href="Jeckyl/UnknownParameter.html">Jeckyl::UnknownParameter</a></li>
+    
+  </ul>
+
+  <h2 id="methods">Methods</h2>
+  <ul>
+    
+      <li><a href="Jeckyl.html#method-c-debug">::debug &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-c-new">::new &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-c-relax">::relax &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-c-strict">::strict &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-i-a_boolean">#a_boolean &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-i-a_flag">#a_flag &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-i-a_hash">#a_hash &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-i-a_matching_string">#a_matching_string &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-i-a_member_of">#a_member_of &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-i-a_readable_file">#a_readable_file &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-i-a_string">#a_string &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-i-a_type_of">#a_type_of &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-i-a_writable_dir">#a_writable_dir &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-i-an_array">#an_array &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-i-an_array_of">#an_array_of &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-i-format_error">#format_error &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-i-get_defaults">#get_defaults &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-i-in_range">#in_range &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-i-method_missing">#method_missing &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-i-raise_config_error">#raise_config_error &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-i-raise_syntax_error">#raise_syntax_error &mdash; Jeckyl</a></li>
+    
+  </ul>
+
+  <div id="validator-badges">
+    <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+    <p><small>Generated with the <a href="http://deveiate.org/projects/Darkfish-Rdoc/">Darkfish
+      Rdoc Generator</a> 2</small>.</p>
+  </div>
+</body>
+</html>

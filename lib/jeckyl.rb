@@ -17,6 +17,8 @@
 # relaxed mode, or create a subclass in which to define various parsing methods. See README
 # for more details of usage.
 #
+
+
 class Jeckyl < Hash
 
   # set this to false if you want unknown methods to be turned into key value pairs regardless
@@ -32,12 +34,26 @@ class Jeckyl < Hash
   # opts is an optional hash of default key value pairs used to fill the hash before the config_file is
   # evaluated. Any values defined by the config file will overwrite these defaults.
   #
-  def initialize(config_file, opts={})
+  def initialize(config_file=nil, opts={})
+    # do whatever a hash has to do
     super()
+
+    @last_symbol = nil
+    @comments = {}
+    @order = Array.new
+
+    # get the defaults defined in the config parser
+    get_defaults()
+
+    return self if config_file.nil?
+
+    # now add/override with whatever was passed in
     opts.each_pair do |key, value|
       self[key] = value
     end
+    # and finally get the values from the config file itself
     self.instance_eval(File.read(config_file), config_file)
+    
   rescue SyntaxError => err
     raise ConfigSyntaxError, err.message
   rescue Errno::ENOENT
@@ -45,35 +61,7 @@ class Jeckyl < Hash
     raise ConfigFileMissing, "#{config_file}"
   end
 
-  # decides what to do with parameters that have not been defined.
-  # if @@strict then it will raise an exception. Otherwise it will create a key value pair
-  #
-  # This method also remembers the method name as the key to prevent the parsers etc from
-  # having to carry this around just to do things like report on it.
-  #
-  def method_missing(symb, parameter)
-
-    @last_symbol = symb
-    @parameter = parameter
-    method_to_call = ('set_' + symb.to_s).to_sym
-    set_method = self.method(method_to_call)
-    set_method.call(parameter)
-
-    # everything must be OK, so
-    self[@last_symbol] = @parameter
-
-  rescue NameError
-    raise if @@debug
-    # no parser method defined.
-    if @@strict then
-      # not tolerable
-      raise UnknownParameter, format_error(symb, parameter, "Unknown parameter")
-    else
-      # feeling relaxed, so lets store it anyway.
-      self[symb] = parameter
-    end
-    
-  end
+  attr_reader :comments, :order
 
   # set the current parameter, a convenience method that uses @last_symbol
 #  def set_param(value)
@@ -91,27 +79,96 @@ class Jeckyl < Hash
     @@strict = true
   end
 
-  def self.debug(val)
+  def self.debug=(val)
     @@debug = (val)
   end
 
-private
+  # a class method to check a given config file one item at a time
+  #
+  # This evaluates the given config file and reports if there are any errors to the
+  # report_file, which defaults to Stdout. Can only do the checking one error at a time.
+  #
+  # To use this method, it is necessary to write a script that calls it for the particular
+  # subclass.
+  #
+  def self.check_config(config_file, report_file=nil)
+
+    me = self.new
+    success = true
+    
+    message = "No errors found in: #{config_file}"
+    begin
+      me.instance_eval(File.read(config_file), config_file)
+    rescue Errno::ENOENT
+      message = "No such config file: #{config_file}"
+      success = false
+    rescue JeckylError => err
+      message = err.message
+      success = false
+    rescue SyntaxError => err
+      message = err.message
+      success = false
+    end
+
+    begin
+      if report_file.nil? then
+        puts message
+      else
+        File.open(report_file, "w") do |rfile|
+          rfile.puts message
+        end
+      end
+      return success
+    rescue Errno::ENOENT
+      raise ReportFileError, "Error with file: #{report_file}"
+    end
+    
+  end
+
+  # a class method to generate a config file from the class definition
+  #
+  # This calls each of the set_ methods, as in get_defaults, and creates a commented template
+  # with the descriptions and default lines
+  #
+  def self.generate_config(cfile=$stdout)
+    me = self.new
+    # everything should now exist
+    me.order.each do |key|
+
+      if me.comments.has_key?(key) then
+        me.comments[key].each do |comment|
+          cfile.puts "# #{comment}"
+        end
+      end
+      cfile.puts "##{key.to_s}: #{me[key]}"
+      cfile.puts ""
+    end
+  end
+
+protected
+
+  # create a description to be used when generating a config template
+  def comment(*strings)
+    @comments[@last_symbol] = strings unless @last_symbol.nil?
+  end
 
   # the following are all helper methods to parse values and raise exceptions if the values are not correct
 
   # file helpers - meanings should be apparent
 
-  def is_writable_dir?(path)
+  # check that the parameter is a directory and that the directory is writable
+  def a_writable_dir(path)
     if FileTest.directory?(path) && FileTest.writable?(path) then
-      true
+      path
     else
       raise_config_error(path, "directory is not writable or does not exist")
     end
   end
 
-  def is_readable_file?(path)
+  # check parameter is a readable file
+  def a_readable_file(path)
     if FileTest.readable?(path) then
-      true
+      path
     else
       raise_config_error(path, "file does not exist")
     end
@@ -119,18 +176,20 @@ private
 
   # simple type helpers
 
-  def is_of_type?(val, type)
-    if val.kind_of?(type) then
-      true
+  # check the parameter is of the required type
+  def a_type_of(obj, type)
+    if obj.kind_of?(type) then
+      obj
     else
-      raise_config_error(val, "value is not of required type: #{type}")
+      raise_config_error(obj, "value is not of required type: #{type}")
     end
   end
-  
-  def is_in_range?(val, lower, upper)
+
+  # check that the parameter is within the required range
+  def in_range(val, lower, upper)
     raise_syntax_error("#{lower.to_s}..#{upper.to_s} is not a range") unless (lower .. upper).kind_of?(Range)
     if (lower .. upper) === val then
-      true
+      val
     else
       raise_config_error(val, "value is not within required range: #{lower.to_s}..#{upper.to_s}")
     end
@@ -139,21 +198,23 @@ private
 
   # boolean helpers
 
-  def is_boolean?(val)
+  # check parameter is a boolean, true or false but not strings "true" or "false"
+  def a_boolean(val)
     if val.kind_of?(TrueClass) || val.kind_of?(FalseClass) then
-      true
+      val
     else
       raise_config_error(val, "Value is not a Boolean")
     end
   end
 
-  # accept yes/no, on/off, etc
-  def to_boolean(val)
+  # check the parameter is a flag, being "true", "false", "yes", "no", "on", "off", or 1 , 0
+  # and return a proper boolean
+  def a_flag(val)
     val = val.downcase if val.kind_of?(String)
     case val
-    when true, "yes", "on", 1
+    when "true", "yes", "on", 1
       true
-    when false, "no", "off", 0
+    when "false", "no", "off", 0
       false
     else
       raise_config_error(val, "Cannot convert to Boolean")
@@ -163,15 +224,17 @@ private
 
   # compound objects
 
-  def is_array?(ary)
+  # check the parameter is an array
+  def an_array(ary)
     if ary.kind_of?(Array) then
-      true
+      ary
     else
       raise_config_error(ary, "value is not an Array")
     end
   end
 
-  def is_array_of?(ary, type)
+  # check the parameter is an array and the array is of the required type
+  def an_array_of(ary, type)
     raise_syntax_error("Provided a value that is a type: #{type.to_s}") unless type.class == Class
     if ary.kind_of?(Array) then
       ary.each do |element|
@@ -179,13 +242,14 @@ private
           raise_config_error(element, "element of array is not of type: #{type}")
         end
       end
-      return true
+      return ary
     else
       raise_config_error(ary, "value is not an Array")
     end
   end
 
-  def is_hash?(hsh)
+  # check the parameter is a hash
+  def a_hash(hsh)
     if hsh.kind_of?(Hash) then
       true
     else
@@ -195,35 +259,93 @@ private
 
   # strings and text and stuff
 
-  def is_a_string?(str)
+  # check the parameter is a string
+  def a_string(str)
     if str.kind_of?(String) then
-      true
+      str
     else
       raise_config_error(str.to_s, "is not a String")
     end
   end
 
-  def matches?(str, pattern)
+  # check the parameter is a string and matches the required pattern
+  def a_matching_string(str, pattern)
     raise_syntax_error("Attempt to pattern match without a Regexp") unless pattern.kind_of?(Regexp)
-    is_a_string?(str)
-    if pattern =~ str then
-      true
+    if pattern =~ a_string(str) then
+      str
     else
       raise_config_error(str, "does not match required pattern: #{pattern.source}")
     end
   end
 
-  # set membership - set is an array of members
-
-  def is_member_of?(symb, set)
+  # set membership - set is an array of members, usually symbols
+  def a_member_of(symb, set)
     raise_syntax_error("Sets to test membership must be arrays") unless set.kind_of?(Array)
     if set.include?(symb) then
-      true
+      symb
     else
       raise_config_error(symb, "is not a member of: #{set.join(', ')}")
     end
   end
 
+
+private
+
+  # decides what to do with parameters that have not been defined.
+  # if @@strict then it will raise an exception. Otherwise it will create a key value pair
+  #
+  # This method also remembers the method name as the key to prevent the parsers etc from
+  # having to carry this around just to do things like report on it.
+  #
+  def method_missing(symb, parameter)
+
+    @last_symbol = symb
+    #@parameter = parameter
+    method_to_call = ('set_' + symb.to_s).to_sym
+    set_method = self.method(method_to_call)
+    
+    self[@last_symbol] = set_method.call(parameter)
+
+  rescue NameError
+    raise if @@debug
+    # no parser method defined.
+    if @@strict then
+      # not tolerable
+      raise UnknownParameter, format_error(symb, parameter, "Unknown parameter")
+    else
+      # feeling relaxed, so lets store it anyway.
+      self[symb] = parameter
+    end
+
+  end
+
+  # get_defaults
+  #
+  # calls each method with the name set_* with no parameters so that the defaults
+  # defined for each will be passed back and used to set the hash before the
+  # config file is evaluated.
+  #
+  def get_defaults
+
+    # go through all of the methods
+    self.methods.each do |method_name|
+      if md = /^set_/.match(method_name) then
+
+        # its a set_ method so call it
+        begin
+          set_method = self.method(method_name.to_sym)
+          # get the corresponding symbol for the hash
+          @last_symbol = md.post_match.to_sym
+          @order << @last_symbol
+          # and call the method with no parameters
+          self[@last_symbol] = set_method.call
+        rescue Exception
+
+          # ignore any errors
+        end
+      end
+    end
+  end
 
   # really private helpers that should not be needed unless the parser method
   # is custom
