@@ -1,4 +1,6 @@
-= JECKYL - Jumpin' Ermin's Configurator for Kwit and easY Linux services
+= JECKYL 
+
+== Jumpin' Ermin's Configurator for Kwit and easY Linux services
 
 Create an options hash from a simple config file to be used to configure a ruby service, Safely!
 Define permitted options, their defauls, checking rules and even comments in one simple class. This

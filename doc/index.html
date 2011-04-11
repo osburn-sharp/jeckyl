@@ -24,55 +24,16 @@
   
   <div id="main">
     
+<h2>JECKYL</h2>
 
-<h2>Jumpin’ Ermine’s Configurator for Kwit and easY Linux services</h2>
+<h2>Jumpin’ Ermin’s Configurator for Kwit and easY Linux services</h2>
 
-<p>The Configurator creates a hash object that has all of the methods of Hash,
-but also loads and parses specific values from the configuration file!</p>
-
-<h3>Usage</h3>
-
-<p>Create a subclass of <a href="Jeckyl.html">Jeckyl</a> in which to define
-methods to parse each of your parameters. For each parameter in the config
-file there needs to be a method with the same name but prefixed with
-“set_”. For example, if there is a parameter “log_dir” then there
-needs to be a method called “set_log_dir”.</p>
-
-<p>Within each method you can run any of the helpers below to check that the
-parameter given is valid. Each helper will raise appropriate exceptions if
-the parameter does not match. If it does, the helper generally returns
-true, but NOT ALWAYS. If the helper parses the parameter OK, then you can
-set the parameter in the hash by just calling set_param with the validated
-value. <a href="Jeckyl.html">Jeckyl</a> remembers the parameter name
-itself.</p>
-
-<p>The successfully returned config hash contains key-value pairs where the
-keys are the parameter names as symbols and the values are the objects
-passed in. This means that along with the usual simple parameters such as
-filenames, numbers etc, you can construct any valid Ruby object and pass
-that in as a parameter. Wonderful!</p>
-
-<p>And because <a href="Jeckyl.html">Jeckyl</a> is itself a subclass of Hash,
-the resulting object behaves just like a normal hash would.</p>
-
-<p>If you are lazy and cannot be bothered with defining lots of methods, you
-can relax the parsing and even use <a href="Jeckyl.html">Jeckyl</a> as-is.
-To relax, call the class method, “relax”. Then any parameter value
-pairs in the config file will be converted to key-value pairs in the hash
-without any cheks at all. Great!</p>
-
-<h3>Testing</h3>
-
-<p>There is an rspec test file to test the whole thing. It uses a test
-subclass in “../test” and various config files in “../conf.d”.</p>
-
-<h2>Note on Patches/Pull Requests</h2>
-
-<p>jeckyl-0.0.1 - first attempt</p>
-
-<h2>Copyright</h2>
-
-<p>Copyright © 2011 Robert Sharp. See LICENSE for details.</p>
+<p>Create an options hash from a simple config file to be used to configure a
+ruby service, Safely! Define permitted options, their defauls, checking
+rules and even comments in one simple class. This is then used to parse the
+config file and create the options hash. And a config-checker and
+config-file generator can be easily created by modifying standard templates
+to suit your config class.</p>
 
   </div>
   
@@ -81,6 +42,8 @@ subclass in “../test” and various config files in “../conf.d”.</p>
   
   <h2>Files</h2>
   <ul>
+    
+      <li class="file"><a href="Intro_txt.html">Intro.txt</a></li>
     
       <li class="file"><a href="LICENCE.html">LICENCE</a></li>
     
@@ -102,6 +65,8 @@ subclass in “../test” and various config files in “../conf.d”.</p>
     
     <li class="class"><a href="Jeckyl/JeckylError.html">Jeckyl::JeckylError</a></li>
     
+    <li class="class"><a href="Jeckyl/ReportFileError.html">Jeckyl::ReportFileError</a></li>
+    
     <li class="class"><a href="Jeckyl/UnknownParameter.html">Jeckyl::UnknownParameter</a></li>
     
   </ul>
@@ -109,7 +74,11 @@ subclass in “../test” and various config files in “../conf.d”.</p>
   <h2 id="methods">Methods</h2>
   <ul>
     
-      <li><a href="Jeckyl.html#method-c-debug">::debug &mdash; Jeckyl</a></li>
+      <li><a href="Jeckyl.html#method-c-check_config">::check_config &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-c-debug-3D">::debug= &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-c-generate_config">::generate_config &mdash; Jeckyl</a></li>
     
       <li><a href="Jeckyl.html#method-c-new">::new &mdash; Jeckyl</a></li>
     
@@ -139,6 +108,10 @@ subclass in “../test” and various config files in “../conf.d”.</p>
     
       <li><a href="Jeckyl.html#method-i-an_array_of">#an_array_of &mdash; Jeckyl</a></li>
     
+      <li><a href="Jeckyl.html#method-i-comment">#comment &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-i-default">#default &mdash; Jeckyl</a></li>
+    
       <li><a href="Jeckyl.html#method-i-format_error">#format_error &mdash; Jeckyl</a></li>
     
       <li><a href="Jeckyl.html#method-i-get_defaults">#get_defaults &mdash; Jeckyl</a></li>
@@ -146,6 +119,8 @@ subclass in “../test” and various config files in “../conf.d”.</p>
       <li><a href="Jeckyl.html#method-i-in_range">#in_range &mdash; Jeckyl</a></li>
     
       <li><a href="Jeckyl.html#method-i-method_missing">#method_missing &mdash; Jeckyl</a></li>
+    
+      <li><a href="Jeckyl.html#method-i-prefix">#prefix &mdash; Jeckyl</a></li>
     
       <li><a href="Jeckyl.html#method-i-raise_config_error">#raise_config_error &mdash; Jeckyl</a></li>
     

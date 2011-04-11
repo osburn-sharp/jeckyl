@@ -14,18 +14,24 @@
 require 'jeckyl'
 
 class TestJeckyl < Jeckyl
+
+  def prefix
+    'set'
+  end
   
-  def set_log_dir(path='/tmp')
+  def set_log_dir(path)
+    default '/tmp'
     comment "Location to write log files to"
     a_writable_dir(path)
   end
 
-  def set_key_file(path=nil)
+  def set_key_file(path)
     comment "key file to be used to check secure commands"
     a_readable_file(path)
   end
 
-  def set_log_level(symb=:verbose)
+  def set_log_level(symb)
+    default :verbose
     comment "Log level can one of the following:",
        "",
        " * :system - log all important messages and use syslog",
@@ -34,12 +40,14 @@ class TestJeckyl < Jeckyl
     a_member_of(symb, symbol_set)
   end
 
-  def set_log_rotation(val=5)
+  def set_log_rotation(val)
+    default 5
     a_type_of(val, Integer)
     in_range(val, 0, 20)
   end
 
-  def set_threshold(val=5.0)
+  def set_threshold(val)
+    default 5.0
     # make sure it is a number
     a_type_of(val, Numeric)
     # now make sure it is a float
@@ -47,40 +55,49 @@ class TestJeckyl < Jeckyl
 
   end
 
-  def set_pi(val=3.14)
+  def set_pi(val)
+    default 3.14
     a_type_of(val, Float)
   end
 
-  def set_debug(bool=false)
+  def set_debug(bool)
+    default false
     a_boolean(bool)
   end
 
-  def set_flag(flag="on")
+  def set_flag(flag)
+    default "on"
     a_flag(flag)
   end
 
-  def set_collection(ary=[])
+  def set_collection(ary)
+    default Array.new
     an_array(ary)
   end
   
-  def set_sieve(ary=[1,2,3])
+  def set_sieve(ary)
+    default [1,2,3]
     an_array_of(ary, Integer)
   end
 
-  def set_options(opts={})
+  def set_options(opts)
+    default Hash.new
     a_hash(opts)
   end
 
-  def set_email(email="me@home.org.uk")
+  def set_email(email)
+    default "me@home.org.uk"
     a_matching_string(email, /^[a-z]+\@[a-z][a-z\-\.]+[a-z]$/)
   end
 
-  def set_invalid_set(member=1)
+  def set_invalid_set(member)
+    default 1
     invalid_set = {:one=>1, :two=>2, :three=>3}
     a_member_of(member, invalid_set)
   end
 
-  def set_invalid_pattern(email="me@work.org.uk")
+  def set_invalid_pattern(email)
+    default "me@work.org.uk"
     pattern = "email"
     a_matching_string(email, pattern)
   end

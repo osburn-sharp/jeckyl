@@ -24,6 +24,7 @@ class Jeckyl < Hash
   # set this to false if you want unknown methods to be turned into key value pairs regardless
   @@strict = true
 
+  # may be useful?
   @@debug = false
 
   # create a configuration object
@@ -38,8 +39,13 @@ class Jeckyl < Hash
     # do whatever a hash has to do
     super()
 
+    # somewhere to save the most recently set symbol
     @last_symbol = nil
+    # hash for comments accessed with the same symbol
     @comments = {}
+    # hash for input defaults
+    @defaults={}
+    # save order in which methods are defined for generating config files
     @order = Array.new
 
     # get the defaults defined in the config parser
@@ -61,7 +67,7 @@ class Jeckyl < Hash
     raise ConfigFileMissing, "#{config_file}"
   end
 
-  attr_reader :comments, :order
+  attr_reader :comments, :order, :defaults
 
   # set the current parameter, a convenience method that uses @last_symbol
 #  def set_param(value)
@@ -93,12 +99,16 @@ class Jeckyl < Hash
   #
   def self.check_config(config_file, report_file=nil)
 
+    # create myself to generate defaults, but nothing else
     me = self.new
+
     success = true
-    
     message = "No errors found in: #{config_file}"
+
     begin
+      # evaluate the config file
       me.instance_eval(File.read(config_file), config_file)
+
     rescue Errno::ENOENT
       message = "No such config file: #{config_file}"
       success = false
@@ -140,16 +150,35 @@ class Jeckyl < Hash
           cfile.puts "# #{comment}"
         end
       end
-      cfile.puts "##{key.to_s}: #{me[key]}"
+      default = me.defaults[key]
+      cfile.puts "##{key.to_s} #{default}"
       cfile.puts ""
     end
   end
+  
+  # set the prefix to the parameter names that should be used for corresponding
+  # configure methods defined for a subclass.
+  #
+  # For example, parameter log_rotation will call configure_log_rotation by default
+  # unless the subclass defines this method differently
+  #
+  def prefix
+    'configure'
+  end
+
 
 protected
 
-  # create a description to be used when generating a config template
+  # create a description for the current parameter, to be used when generating a config template
   def comment(*strings)
     @comments[@last_symbol] = strings unless @last_symbol.nil?
+  end
+  
+  # set default value(s) for the current parameter. 
+  #
+  def default(val)
+    return if @last_symbol.nil? || @defaults.has_key?(@last_symbol)
+    @defaults[@last_symbol] = val
   end
 
   # the following are all helper methods to parse values and raise exceptions if the values are not correct
@@ -301,7 +330,7 @@ private
 
     @last_symbol = symb
     #@parameter = parameter
-    method_to_call = ('set_' + symb.to_s).to_sym
+    method_to_call = ("#{self.prefix}_" + symb.to_s).to_sym
     set_method = self.method(method_to_call)
     
     self[@last_symbol] = set_method.call(parameter)
@@ -329,18 +358,27 @@ private
 
     # go through all of the methods
     self.methods.each do |method_name|
-      if md = /^set_/.match(method_name) then
+      if md = /^#{self.prefix}_/.match(method_name) then
 
         # its a set_ method so call it
+        
+        set_method = self.method(method_name.to_sym)
+        # get the corresponding symbol for the hash
+        @last_symbol = md.post_match.to_sym
+        @order << @last_symbol
+        # and call the method with no parameters
         begin
-          set_method = self.method(method_name.to_sym)
-          # get the corresponding symbol for the hash
-          @last_symbol = md.post_match.to_sym
-          @order << @last_symbol
-          # and call the method with no parameters
-          self[@last_symbol] = set_method.call
+          a_value = set_method.call(1)
         rescue Exception
-
+          # ignore any errors
+        end
+        begin
+          # now set the actual default from calling the method
+          # which may be different if the method transforms
+          # the parameter!
+          param = @defaults[@last_symbol]
+          self[@last_symbol] = set_method.call(param)
+        rescue Exception
           # ignore any errors
         end
       end

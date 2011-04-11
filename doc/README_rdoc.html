@@ -39,6 +39,8 @@
         <h3 class="section-header">Files</h3>
         <ul>
         
+          <li class="file"><a href="./Intro_txt.html">Intro.txt</a></li>
+        
           <li class="file"><a href="./LICENCE.html">LICENCE</a></li>
         
           <li class="file"><a href="./README_rdoc.html">README.rdoc</a></li>
@@ -72,6 +74,8 @@
         
           <li><a href="./Jeckyl/JeckylError.html">Jeckyl::JeckylError</a></li>
         
+          <li><a href="./Jeckyl/ReportFileError.html">Jeckyl::ReportFileError</a></li>
+        
           <li><a href="./Jeckyl/UnknownParameter.html">Jeckyl::UnknownParameter</a></li>
         
         </ul>
@@ -84,28 +88,53 @@
 
   <div id="documentation">
     
-<h1>jeckyl</h1>
+<h1>JECKYL </h1>
 
-<h2>Jumpin’ Ermine’s Configurator for Kwit and easY Linux services</h2>
+<h2>Jumpin’ Ermin’s Configurator for Kwit and easY Linux services</h2>
 
-<p>The Configurator creates a hash object that has all of the methods of Hash,
-but also loads and parses specific values from the configuration file!</p>
+<p>Create an options hash from a simple config file to be used to configure a
+ruby service, Safely! Define permitted options, their defauls, checking
+rules and even comments in one simple class. This is then used to parse the
+config file and create the options hash. And a config-checker and
+config-file generator can be easily created by modifying standard templates
+to suit your config class.</p>
 
-<h3>Usage</h3>
+<h2>Usage</h2>
 
 <p>Create a subclass of <a href="Jeckyl.html">Jeckyl</a> in which to define
 methods to parse each of your parameters. For each parameter in the config
 file there needs to be a method with the same name but prefixed with
 “set_”. For example, if there is a parameter “log_dir” then there
-needs to be a method called “set_log_dir”.</p>
+needs to be a method called “set_log_dir”. Each method should be called
+with one parameter value, which can be assigned a default value. <a
+href="Jeckyl.html">Jeckyl</a> uses these defaults to create default values
+in the options hash. When you create an instance of the configurator, you
+can pass in a hash with additional options or values to overide these
+defaults.</p>
 
-<p>Within each method you can run any of the helpers below to check that the
-parameter given is valid. Each helper will raise appropriate exceptions if
-the parameter does not match. If it does, the helper generally returns
-true, but NOT ALWAYS. If the helper parses the parameter OK, then you can
-set the parameter in the hash by just calling set_param with the validated
-value. <a href="Jeckyl.html">Jeckyl</a> remembers the parameter name
-itself.</p>
+<p>Within each method you can use any of the helpers defined in <a
+href="Jeckyl.html">Jeckyl</a> to check that the parameter given is valid.
+Each helper will raise appropriate exceptions if the parameter does not
+match. If the parameter is OK you can return it as-is or you can modify it.
+For example, you could turn a convenient MB size parameter as bytes by
+multiplying the parameter before returning it. Some helper methods modify
+the value for you (e.g. a_flag returns boolean for any of the valid flag
+options).</p>
+
+<p>You can also have multiple fields for a parameter, just make sure you pass
+in multiple parameters to the method class. But, these fields need to be
+reduced to a single hash entry. This allows you, for example, to perform
+checks on simple fields before combining them into a complex object, hidden
+from the config file writer.</p>
+
+<p>You can easily add your own helpers if you need to. Check the ones in <a
+href="Jeckyl.html">Jeckyl</a> to see how they work.</p>
+
+<p>There is also a helper called “comment” which takes any number of
+comment strings as parameters. <a href="Jeckyl.html">Jeckyl</a> saves these
+strings as arrays in a similar hash indexed by the same parameter name.
+These comments are output when you generate a config template with the
+generate_config class method.</p>
 
 <p>The successfully returned config hash contains key-value pairs where the
 keys are the parameter names as symbols and the values are the objects
@@ -114,26 +143,69 @@ filenames, numbers etc, you can construct any valid Ruby object and pass
 that in as a parameter. Wonderful!</p>
 
 <p>And because <a href="Jeckyl.html">Jeckyl</a> is itself a subclass of Hash,
-the resulting object behaves just like a normal hash would.</p>
+the resulting object behaves just like a normal hash would. Fantastic!</p>
 
 <p>If you are lazy and cannot be bothered with defining lots of methods, you
 can relax the parsing and even use <a href="Jeckyl.html">Jeckyl</a> as-is.
 To relax, call the class method, “relax”. Then any parameter value
 pairs in the config file will be converted to key-value pairs in the hash
-without any cheks at all. Great!</p>
+without any checks at all. Great!</p>
 
-<h3>Testing</h3>
+<h3>Why?</h3>
 
-<p>There is an rspec test file to test the whole thing. It uses a test
-subclass in “../test” and various config files in “../conf.d”.</p>
+<p>Having tried various config file solutions, I had ended up using yaml
+files, but i found checking them very difficult because they are not very
+friendly and very sensitive to spacing issues. In looking for yet another
+alternative, I came across the approach used by Unicorn (the backend web
+machine I now use for Rails apps). I liked the concept but thought it could
+be made more general, which resulted in <a href="Jeckyl.html">Jeckyl</a>.</p>
 
-<h2>Note on Patches/Pull Requests</h2>
+<h3>Example</h3>
+
+<p>A good example is provided in the test configurator, TestJeckyl in the test
+directory.</p>
+
+<h2>Testing / adapting</h2>
+
+<p>There is an rspec test file to test the whole thing. It uses the test
+subclass in “../test” and various config files in “../conf.d”.
+There is another rspec file that tests the config_check function.</p>
+
+<p>There are also two basic scripts in the bin directory:</p>
+<ul><li>
+<p>jeckyl_check_config config_file - will check the given config file and
+generates error or success messages</p>
+</li><li>
+<p>jeckyl_generate_config - creates a config template from the configurator
+class.</p>
+</li></ul>
+
+<h2>Installation</h2>
+
+<p>Its DIY at the moment. I dont use gems to manage ruby files I generate on
+my network because I haven’t figured a fool-proof way to ensure all
+machines can see the same files all of the time.</p>
+
+<h2>Change Log</h2>
+
+<p>jeckyl-0.0.2 - update to add comments, generator and checker.</p>
 
 <p>jeckyl-0.0.1 - first attempt</p>
 
+<h2>Contact</h2>
+
+<p>robert</p>
+
 <h2>Copyright</h2>
 
-<p>Copyright © 2011 Robert Sharp. See LICENSE for details.</p>
+<p>Copyright © 2011 Robert Sharp. See <a href="LICENCE.html">LICENCE</a> for
+details. (Yes, with a C!)</p>
+
+<h2>Warranty</h2>
+
+<p>This software is provided “as is” and without any express or implied
+warranties, including, without limitation, the implied warranties of
+merchantibility and fitness for a particular purpose.</p>
 
   </div>
 

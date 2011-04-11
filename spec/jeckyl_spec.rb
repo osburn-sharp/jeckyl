@@ -29,6 +29,7 @@ describe "Jeckyl" do
     conf[:key_file].should be_nil
     conf[:pi].should == 3.14
     conf[:sieve].should == [3,4,5]
+    conf[:log_rotation].should == 5
   end
 
   # general exceptions

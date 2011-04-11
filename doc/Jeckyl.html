@@ -74,6 +74,8 @@
           
           <li><span class="type">CLASS</span> <a href="Jeckyl/JeckylError.html">Jeckyl::JeckylError</a></li>
           
+          <li><span class="type">CLASS</span> <a href="Jeckyl/ReportFileError.html">Jeckyl::ReportFileError</a></li>
+          
           <li><span class="type">CLASS</span> <a href="Jeckyl/UnknownParameter.html">Jeckyl::UnknownParameter</a></li>
           
         </ul>
@@ -86,7 +88,11 @@
         <h3 class="section-header">Methods</h3>
         <ul class="link-list">
           
-          <li><a href="#method-c-debug">::debug</a></li>
+          <li><a href="#method-c-check_config">::check_config</a></li>
+          
+          <li><a href="#method-c-debug-3D">::debug=</a></li>
+          
+          <li><a href="#method-c-generate_config">::generate_config</a></li>
           
           <li><a href="#method-c-new">::new</a></li>
           
@@ -116,6 +122,10 @@
           
           <li><a href="#method-i-an_array_of">#an_array_of</a></li>
           
+          <li><a href="#method-i-comment">#comment</a></li>
+          
+          <li><a href="#method-i-default">#default</a></li>
+          
           <li><a href="#method-i-format_error">#format_error</a></li>
           
           <li><a href="#method-i-get_defaults">#get_defaults</a></li>
@@ -123,6 +133,8 @@
           <li><a href="#method-i-in_range">#in_range</a></li>
           
           <li><a href="#method-i-method_missing">#method_missing</a></li>
+          
+          <li><a href="#method-i-prefix">#prefix</a></li>
           
           <li><a href="#method-i-raise_config_error">#raise_config_error</a></li>
           
@@ -141,6 +153,8 @@
       <div id="fileindex-section" class="section project-section">
         <h3 class="section-header">Files</h3>
         <ul>
+        
+          <li class="file"><a href="./Intro_txt.html">Intro.txt</a></li>
         
           <li class="file"><a href="./LICENCE.html">LICENCE</a></li>
         
@@ -174,6 +188,8 @@
           <li><a href="./Jeckyl/ConfigSyntaxError.html">Jeckyl::ConfigSyntaxError</a></li>
         
           <li><a href="./Jeckyl/JeckylError.html">Jeckyl::JeckylError</a></li>
+        
+          <li><a href="./Jeckyl/ReportFileError.html">Jeckyl::ReportFileError</a></li>
         
           <li><a href="./Jeckyl/UnknownParameter.html">Jeckyl::UnknownParameter</a></li>
         
@@ -225,6 +241,58 @@ parsing methods. See README for more details of usage.</p>
       
 
       
+      <!-- Attributes -->
+      <div id="attribute-method-details" class="method-section section">
+        <h3 class="section-header">Attributes</h3>
+
+        
+        <div id="comments-attribute-method" class="method-detail">
+          <a name="comments"></a>
+          
+          <div class="method-heading attribute-method-heading">
+            <span class="method-name">comments</span><span
+              class="attribute-access-type">[R]</span>
+          </div>
+
+          <div class="method-description">
+          
+          
+          
+          </div>
+        </div>
+        
+        <div id="defaults-attribute-method" class="method-detail">
+          <a name="defaults"></a>
+          
+          <div class="method-heading attribute-method-heading">
+            <span class="method-name">defaults</span><span
+              class="attribute-access-type">[R]</span>
+          </div>
+
+          <div class="method-description">
+          
+          
+          
+          </div>
+        </div>
+        
+        <div id="order-attribute-method" class="method-detail">
+          <a name="order"></a>
+          
+          <div class="method-heading attribute-method-heading">
+            <span class="method-name">order</span><span
+              class="attribute-access-type">[R]</span>
+          </div>
+
+          <div class="method-description">
+          
+          
+          
+          </div>
+        </div>
+        
+      </div><!-- attribute-method-details -->
+      
 
       <!-- Methods -->
       
@@ -232,12 +300,86 @@ parsing methods. See README for more details of usage.</p>
         <h3 class="section-header">Public Class Methods</h3>
 
       
-        <div id="debug-method" class="method-detail ">
-          <a name="method-c-debug"></a>
+        <div id="check_config-method" class="method-detail ">
+          <a name="method-c-check_config"></a>
 
           
           <div class="method-heading">
-            <span class="method-name">debug</span><span
+            <span class="method-name">check_config</span><span
+              class="method-args">(config_file, report_file=nil)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>a class method to check a given config file one item at a time</p>
+
+<p>This evaluates the given config file and reports if there are any errors to
+the report_file, which defaults to Stdout. Can only do the checking one
+error at a time.</p>
+
+<p>To use this method, it is necessary to write a script that calls it for the
+particular subclass.</p>
+            
+
+            
+            <div class="method-source-code" id="check_config-source">
+<pre>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 100</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">check_config</span>(<span class="ruby-identifier">config_file</span>, <span class="ruby-identifier">report_file</span>=<span class="ruby-keyword">nil</span>)
+
+  <span class="ruby-comment"># create myself to generate defaults, but nothing else</span>
+  <span class="ruby-identifier">me</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">new</span>
+
+  <span class="ruby-identifier">success</span> = <span class="ruby-keyword">true</span>
+  <span class="ruby-identifier">message</span> = <span class="ruby-node">&quot;No errors found in: #{config_file}&quot;</span>
+
+  <span class="ruby-keyword">begin</span>
+    <span class="ruby-comment"># evaluate the config file</span>
+    <span class="ruby-identifier">me</span>.<span class="ruby-identifier">instance_eval</span>(<span class="ruby-constant">File</span>.<span class="ruby-identifier">read</span>(<span class="ruby-identifier">config_file</span>), <span class="ruby-identifier">config_file</span>)
+
+  <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Errno</span><span class="ruby-operator">::</span><span class="ruby-constant">ENOENT</span>
+    <span class="ruby-identifier">message</span> = <span class="ruby-node">&quot;No such config file: #{config_file}&quot;</span>
+    <span class="ruby-identifier">success</span> = <span class="ruby-keyword">false</span>
+  <span class="ruby-keyword">rescue</span> <span class="ruby-constant">JeckylError</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">err</span>
+    <span class="ruby-identifier">message</span> = <span class="ruby-identifier">err</span>.<span class="ruby-identifier">message</span>
+    <span class="ruby-identifier">success</span> = <span class="ruby-keyword">false</span>
+  <span class="ruby-keyword">rescue</span> <span class="ruby-constant">SyntaxError</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">err</span>
+    <span class="ruby-identifier">message</span> = <span class="ruby-identifier">err</span>.<span class="ruby-identifier">message</span>
+    <span class="ruby-identifier">success</span> = <span class="ruby-keyword">false</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-keyword">begin</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">report_file</span>.<span class="ruby-identifier">nil?</span> <span class="ruby-keyword">then</span>
+      <span class="ruby-identifier">puts</span> <span class="ruby-identifier">message</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-constant">File</span>.<span class="ruby-identifier">open</span>(<span class="ruby-identifier">report_file</span>, <span class="ruby-string">&quot;w&quot;</span>) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">rfile</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">rfile</span>.<span class="ruby-identifier">puts</span> <span class="ruby-identifier">message</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-identifier">success</span>
+  <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Errno</span><span class="ruby-operator">::</span><span class="ruby-constant">ENOENT</span>
+    <span class="ruby-identifier">raise</span> <span class="ruby-constant">ReportFileError</span>, <span class="ruby-node">&quot;Error with file: #{report_file}&quot;</span>
+  <span class="ruby-keyword">end</span>
+  
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- check_config-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- check_config-method -->
+
+      
+        <div id="debug-3D-method" class="method-detail ">
+          <a name="method-c-debug-3D"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">debug=</span><span
               class="method-args">(val)</span>
             <span class="method-click-advice">click to toggle source</span>
           </div>
@@ -249,20 +391,69 @@ parsing methods. See README for more details of usage.</p>
             
 
             
-            <div class="method-source-code" id="debug-source">
+            <div class="method-source-code" id="debug-3D-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 74</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">debug</span>(<span class="ruby-identifier">val</span>)
+<span class="ruby-comment"># File lib/jeckyl.rb, line 88</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">debug=</span>(<span class="ruby-identifier">val</span>)
   <span class="ruby-identifier">@@debug</span> = (<span class="ruby-identifier">val</span>)
 <span class="ruby-keyword">end</span></pre>
-            </div><!-- debug-source -->
+            </div><!-- debug-3D-source -->
             
           </div>
 
           
 
           
-        </div><!-- debug-method -->
+        </div><!-- debug-3D-method -->
+
+      
+        <div id="generate_config-method" class="method-detail ">
+          <a name="method-c-generate_config"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">generate_config</span><span
+              class="method-args">(cfile=$stdout)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>a class method to generate a config file from the class definition</p>
+
+<p>This calls each of the set_ methods, as in <a
+href="Jeckyl.html#method-i-get_defaults">get_defaults</a>, and creates a
+commented template with the descriptions and default lines</p>
+            
+
+            
+            <div class="method-source-code" id="generate_config-source">
+<pre>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 143</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">generate_config</span>(<span class="ruby-identifier">cfile</span>=<span class="ruby-identifier">$stdout</span>)
+  <span class="ruby-identifier">me</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">new</span>
+  <span class="ruby-comment"># everything should now exist</span>
+  <span class="ruby-identifier">me</span>.<span class="ruby-identifier">order</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">key</span><span class="ruby-operator">|</span>
+
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">me</span>.<span class="ruby-identifier">comments</span>.<span class="ruby-identifier">has_key?</span>(<span class="ruby-identifier">key</span>) <span class="ruby-keyword">then</span>
+      <span class="ruby-identifier">me</span>.<span class="ruby-identifier">comments</span>[<span class="ruby-identifier">key</span>].<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">comment</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">cfile</span>.<span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;# #{comment}&quot;</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">default</span> = <span class="ruby-identifier">me</span>.<span class="ruby-identifier">defaults</span>[<span class="ruby-identifier">key</span>]
+    <span class="ruby-identifier">cfile</span>.<span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;##{key.to_s} #{default}&quot;</span>
+    <span class="ruby-identifier">cfile</span>.<span class="ruby-identifier">puts</span> <span class="ruby-string">&quot;&quot;</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- generate_config-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- generate_config-method -->
 
       
         <div id="new-method" class="method-detail ">
@@ -271,7 +462,7 @@ parsing methods. See README for more details of usage.</p>
           
           <div class="method-heading">
             <span class="method-name">new</span><span
-              class="method-args">(config_file, opts={})</span>
+              class="method-args">(config_file=nil, opts={})</span>
             <span class="method-click-advice">click to toggle source</span>
           </div>
           
@@ -291,13 +482,24 @@ will overwrite these defaults.</p>
             
             <div class="method-source-code" id="new-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 36</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">config_file</span>, <span class="ruby-identifier">opts</span>={})
+<span class="ruby-comment"># File lib/jeckyl.rb, line 38</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">config_file</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">opts</span>={})
   <span class="ruby-comment"># do whatever a hash has to do</span>
   <span class="ruby-keyword">super</span>()
 
+  <span class="ruby-comment"># somewhere to save the most recently set symbol</span>
+  <span class="ruby-ivar">@last_symbol</span> = <span class="ruby-keyword">nil</span>
+  <span class="ruby-comment"># hash for comments accessed with the same symbol</span>
+  <span class="ruby-ivar">@comments</span> = {}
+  <span class="ruby-comment"># hash for input defaults</span>
+  <span class="ruby-ivar">@defaults</span>={}
+  <span class="ruby-comment"># save order in which methods are defined for generating config files</span>
+  <span class="ruby-ivar">@order</span> = <span class="ruby-constant">Array</span>.<span class="ruby-identifier">new</span>
+
   <span class="ruby-comment"># get the defaults defined in the config parser</span>
   <span class="ruby-identifier">get_defaults</span>()
+
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">self</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">config_file</span>.<span class="ruby-identifier">nil?</span>
 
   <span class="ruby-comment"># now add/override with whatever was passed in</span>
   <span class="ruby-identifier">opts</span>.<span class="ruby-identifier">each_pair</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">key</span>, <span class="ruby-identifier">value</span><span class="ruby-operator">|</span>
@@ -341,7 +543,7 @@ will overwrite these defaults.</p>
             
             <div class="method-source-code" id="relax-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 64</span>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 78</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">relax</span>
   <span class="ruby-identifier">@@strict</span> = <span class="ruby-keyword">false</span>
 <span class="ruby-keyword">end</span></pre>
@@ -375,7 +577,7 @@ multiple files) but useful perhaps for testing</p>
             
             <div class="method-source-code" id="strict-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 70</span>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 84</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">strict</span>
   <span class="ruby-identifier">@@strict</span> = <span class="ruby-keyword">true</span>
 <span class="ruby-keyword">end</span></pre>
@@ -390,6 +592,49 @@ multiple files) but useful perhaps for testing</p>
 
       
       </div><!-- public-class-method-details -->
+    
+      <div id="public-instance-method-details" class="method-section section">
+        <h3 class="section-header">Public Instance Methods</h3>
+
+      
+        <div id="prefix-method" class="method-detail ">
+          <a name="method-i-prefix"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">prefix</span><span
+              class="method-args">()</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>set the prefix to the parameter names that should be used for corresponding
+configure methods defined for a subclass.</p>
+
+<p>For example, parameter log_rotation will call configure_log_rotation by
+default unless the subclass defines this method differently</p>
+            
+
+            
+            <div class="method-source-code" id="prefix-source">
+<pre>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 165</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">prefix</span>
+  <span class="ruby-string">'configure'</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- prefix-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- prefix-method -->
+
+      
+      </div><!-- public-instance-method-details -->
     
       <div id="protected-instance-method-details" class="method-section section">
         <h3 class="section-header">Protected Instance Methods</h3>
@@ -415,7 +660,7 @@ multiple files) but useful perhaps for testing</p>
             
             <div class="method-source-code" id="a_boolean-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 127</span>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 231</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">a_boolean</span>(<span class="ruby-identifier">val</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">val</span>.<span class="ruby-identifier">kind_of?</span>(<span class="ruby-constant">TrueClass</span>) <span class="ruby-operator">||</span> <span class="ruby-identifier">val</span>.<span class="ruby-identifier">kind_of?</span>(<span class="ruby-constant">FalseClass</span>) <span class="ruby-keyword">then</span>
     <span class="ruby-identifier">val</span>
@@ -453,7 +698,7 @@ multiple files) but useful perhaps for testing</p>
             
             <div class="method-source-code" id="a_flag-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 137</span>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 241</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">a_flag</span>(<span class="ruby-identifier">val</span>)
   <span class="ruby-identifier">val</span> = <span class="ruby-identifier">val</span>.<span class="ruby-identifier">downcase</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">val</span>.<span class="ruby-identifier">kind_of?</span>(<span class="ruby-constant">String</span>)
   <span class="ruby-keyword">case</span> <span class="ruby-identifier">val</span>
@@ -494,7 +739,7 @@ multiple files) but useful perhaps for testing</p>
             
             <div class="method-source-code" id="a_hash-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 177</span>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 281</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">a_hash</span>(<span class="ruby-identifier">hsh</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">hsh</span>.<span class="ruby-identifier">kind_of?</span>(<span class="ruby-constant">Hash</span>) <span class="ruby-keyword">then</span>
     <span class="ruby-keyword">true</span>
@@ -531,7 +776,7 @@ multiple files) but useful perhaps for testing</p>
             
             <div class="method-source-code" id="a_matching_string-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 197</span>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 301</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">a_matching_string</span>(<span class="ruby-identifier">str</span>, <span class="ruby-identifier">pattern</span>)
   <span class="ruby-identifier">raise_syntax_error</span>(<span class="ruby-string">&quot;Attempt to pattern match without a Regexp&quot;</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">pattern</span>.<span class="ruby-identifier">kind_of?</span>(<span class="ruby-constant">Regexp</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">pattern</span> <span class="ruby-operator">=~</span> <span class="ruby-identifier">a_string</span>(<span class="ruby-identifier">str</span>) <span class="ruby-keyword">then</span>
@@ -569,7 +814,7 @@ multiple files) but useful perhaps for testing</p>
             
             <div class="method-source-code" id="a_member_of-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 207</span>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 311</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">a_member_of</span>(<span class="ruby-identifier">symb</span>, <span class="ruby-identifier">set</span>)
   <span class="ruby-identifier">raise_syntax_error</span>(<span class="ruby-string">&quot;Sets to test membership must be arrays&quot;</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">set</span>.<span class="ruby-identifier">kind_of?</span>(<span class="ruby-constant">Array</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">set</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">symb</span>) <span class="ruby-keyword">then</span>
@@ -607,7 +852,7 @@ multiple files) but useful perhaps for testing</p>
             
             <div class="method-source-code" id="a_readable_file-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 94</span>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 198</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">a_readable_file</span>(<span class="ruby-identifier">path</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-constant">FileTest</span>.<span class="ruby-identifier">readable?</span>(<span class="ruby-identifier">path</span>) <span class="ruby-keyword">then</span>
     <span class="ruby-identifier">path</span>
@@ -644,7 +889,7 @@ multiple files) but useful perhaps for testing</p>
             
             <div class="method-source-code" id="a_string-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 188</span>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 292</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">a_string</span>(<span class="ruby-identifier">str</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">str</span>.<span class="ruby-identifier">kind_of?</span>(<span class="ruby-constant">String</span>) <span class="ruby-keyword">then</span>
     <span class="ruby-identifier">str</span>
@@ -681,7 +926,7 @@ multiple files) but useful perhaps for testing</p>
             
             <div class="method-source-code" id="a_type_of-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 105</span>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 209</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">a_type_of</span>(<span class="ruby-identifier">obj</span>, <span class="ruby-identifier">type</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">obj</span>.<span class="ruby-identifier">kind_of?</span>(<span class="ruby-identifier">type</span>) <span class="ruby-keyword">then</span>
     <span class="ruby-identifier">obj</span>
@@ -718,7 +963,7 @@ multiple files) but useful perhaps for testing</p>
             
             <div class="method-source-code" id="a_writable_dir-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 85</span>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 189</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">a_writable_dir</span>(<span class="ruby-identifier">path</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-constant">FileTest</span>.<span class="ruby-identifier">directory?</span>(<span class="ruby-identifier">path</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-constant">FileTest</span>.<span class="ruby-identifier">writable?</span>(<span class="ruby-identifier">path</span>) <span class="ruby-keyword">then</span>
     <span class="ruby-identifier">path</span>
@@ -755,7 +1000,7 @@ multiple files) but useful perhaps for testing</p>
             
             <div class="method-source-code" id="an_array-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 153</span>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 257</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">an_array</span>(<span class="ruby-identifier">ary</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">ary</span>.<span class="ruby-identifier">kind_of?</span>(<span class="ruby-constant">Array</span>) <span class="ruby-keyword">then</span>
     <span class="ruby-identifier">ary</span>
@@ -792,7 +1037,7 @@ multiple files) but useful perhaps for testing</p>
             
             <div class="method-source-code" id="an_array_of-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 162</span>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 266</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">an_array_of</span>(<span class="ruby-identifier">ary</span>, <span class="ruby-identifier">type</span>)
   <span class="ruby-identifier">raise_syntax_error</span>(<span class="ruby-node">&quot;Provided a value that is a type: #{type.to_s}&quot;</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">type</span>.<span class="ruby-identifier">class</span> <span class="ruby-operator">==</span> <span class="ruby-constant">Class</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">ary</span>.<span class="ruby-identifier">kind_of?</span>(<span class="ruby-constant">Array</span>) <span class="ruby-keyword">then</span>
@@ -816,6 +1061,74 @@ multiple files) but useful perhaps for testing</p>
         </div><!-- an_array_of-method -->
 
       
+        <div id="comment-method" class="method-detail ">
+          <a name="method-i-comment"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">comment</span><span
+              class="method-args">(*strings)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>create a description for the current parameter, to be used when generating
+a config template</p>
+            
+
+            
+            <div class="method-source-code" id="comment-source">
+<pre>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 173</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">comment</span>(*<span class="ruby-identifier">strings</span>)
+  <span class="ruby-ivar">@comments</span>[<span class="ruby-ivar">@last_symbol</span>] = <span class="ruby-identifier">strings</span> <span class="ruby-keyword">unless</span> <span class="ruby-ivar">@last_symbol</span>.<span class="ruby-identifier">nil?</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- comment-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- comment-method -->
+
+      
+        <div id="default-method" class="method-detail ">
+          <a name="method-i-default"></a>
+
+          
+          <div class="method-heading">
+            <span class="method-name">default</span><span
+              class="method-args">(val)</span>
+            <span class="method-click-advice">click to toggle source</span>
+          </div>
+          
+
+          <div class="method-description">
+            
+            <p>set default value(s) for the current parameter.</p>
+            
+
+            
+            <div class="method-source-code" id="default-source">
+<pre>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 179</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">default</span>(<span class="ruby-identifier">val</span>)
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@last_symbol</span>.<span class="ruby-identifier">nil?</span> <span class="ruby-operator">||</span> <span class="ruby-ivar">@defaults</span>.<span class="ruby-identifier">has_key?</span>(<span class="ruby-ivar">@last_symbol</span>)
+  <span class="ruby-ivar">@defaults</span>[<span class="ruby-ivar">@last_symbol</span>] = <span class="ruby-identifier">val</span>
+<span class="ruby-keyword">end</span></pre>
+            </div><!-- default-source -->
+            
+          </div>
+
+          
+
+          
+        </div><!-- default-method -->
+
+      
         <div id="in_range-method" class="method-detail ">
           <a name="method-i-in_range"></a>
 
@@ -835,7 +1148,7 @@ multiple files) but useful perhaps for testing</p>
             
             <div class="method-source-code" id="in_range-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 114</span>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 218</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">in_range</span>(<span class="ruby-identifier">val</span>, <span class="ruby-identifier">lower</span>, <span class="ruby-identifier">upper</span>)
   <span class="ruby-identifier">raise_syntax_error</span>(<span class="ruby-node">&quot;#{lower.to_s}..#{upper.to_s} is not a range&quot;</span>) <span class="ruby-keyword">unless</span> (<span class="ruby-identifier">lower</span> <span class="ruby-operator">..</span> <span class="ruby-identifier">upper</span>).<span class="ruby-identifier">kind_of?</span>(<span class="ruby-constant">Range</span>)
   <span class="ruby-keyword">if</span> (<span class="ruby-identifier">lower</span> <span class="ruby-operator">..</span> <span class="ruby-identifier">upper</span>) <span class="ruby-operator">===</span> <span class="ruby-identifier">val</span> <span class="ruby-keyword">then</span>
@@ -879,7 +1192,7 @@ multiple files) but useful perhaps for testing</p>
             
             <div class="method-source-code" id="format_error-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 285</span>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 399</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">format_error</span>(<span class="ruby-identifier">key</span>, <span class="ruby-identifier">value</span>, <span class="ruby-identifier">message</span>)
   <span class="ruby-node">&quot;[#{key}]: #{value} - #{message}&quot;</span>
 <span class="ruby-keyword">end</span></pre>
@@ -906,7 +1219,7 @@ multiple files) but useful perhaps for testing</p>
 
           <div class="method-description">
             
-            <p>set_defaults</p>
+            <p><a href="Jeckyl.html#method-i-get_defaults">get_defaults</a></p>
 
 <p>calls each method with the name set_* with no parameters so that the
 defaults defined for each will be passed back and used to set the hash
@@ -916,22 +1229,32 @@ before the config file is evaluated.</p>
             
             <div class="method-source-code" id="get_defaults-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 253</span>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 357</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">get_defaults</span>
 
   <span class="ruby-comment"># go through all of the methods</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">methods</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">method_name</span><span class="ruby-operator">|</span>
-    <span class="ruby-keyword">if</span> <span class="ruby-identifier">md</span> = <span class="ruby-regexp">/^set_/</span>.<span class="ruby-identifier">match</span>(<span class="ruby-identifier">method_name</span>) <span class="ruby-keyword">then</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">md</span> = <span class="ruby-node">/^#{self.prefix}_/</span>.<span class="ruby-identifier">match</span>(<span class="ruby-identifier">method_name</span>) <span class="ruby-keyword">then</span>
 
       <span class="ruby-comment"># its a set_ method so call it</span>
+      
+      <span class="ruby-identifier">set_method</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">method</span>(<span class="ruby-identifier">method_name</span>.<span class="ruby-identifier">to_sym</span>)
+      <span class="ruby-comment"># get the corresponding symbol for the hash</span>
+      <span class="ruby-ivar">@last_symbol</span> = <span class="ruby-identifier">md</span>.<span class="ruby-identifier">post_match</span>.<span class="ruby-identifier">to_sym</span>
+      <span class="ruby-ivar">@order</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-ivar">@last_symbol</span>
+      <span class="ruby-comment"># and call the method with no parameters</span>
       <span class="ruby-keyword">begin</span>
-        <span class="ruby-identifier">set_method</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">method</span>(<span class="ruby-identifier">method_name</span>.<span class="ruby-identifier">to_sym</span>)
-        <span class="ruby-comment"># get the corresponding symbol for the hash</span>
-        <span class="ruby-identifier">symb</span> = <span class="ruby-identifier">md</span>.<span class="ruby-identifier">post_match</span>.<span class="ruby-identifier">to_sym</span>
-        <span class="ruby-comment"># and call the method with no parameters</span>
-        <span class="ruby-keyword">self</span>[<span class="ruby-identifier">symb</span>] = <span class="ruby-identifier">set_method</span>.<span class="ruby-identifier">call</span>
+        <span class="ruby-identifier">a_value</span> = <span class="ruby-identifier">set_method</span>.<span class="ruby-identifier">call</span>(<span class="ruby-value">1</span>)
       <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span>
-
+        <span class="ruby-comment"># ignore any errors</span>
+      <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">begin</span>
+        <span class="ruby-comment"># now set the actual default from calling the method</span>
+        <span class="ruby-comment"># which may be different if the method transforms</span>
+        <span class="ruby-comment"># the parameter!</span>
+        <span class="ruby-identifier">param</span> = <span class="ruby-ivar">@defaults</span>[<span class="ruby-ivar">@last_symbol</span>]
+        <span class="ruby-keyword">self</span>[<span class="ruby-ivar">@last_symbol</span>] = <span class="ruby-identifier">set_method</span>.<span class="ruby-identifier">call</span>(<span class="ruby-identifier">param</span>)
+      <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span>
         <span class="ruby-comment"># ignore any errors</span>
       <span class="ruby-keyword">end</span>
     <span class="ruby-keyword">end</span>
@@ -971,12 +1294,12 @@ on it.</p>
             
             <div class="method-source-code" id="method_missing-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 225</span>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 329</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">method_missing</span>(<span class="ruby-identifier">symb</span>, <span class="ruby-identifier">parameter</span>)
 
   <span class="ruby-ivar">@last_symbol</span> = <span class="ruby-identifier">symb</span>
   <span class="ruby-comment">#@parameter = parameter</span>
-  <span class="ruby-identifier">method_to_call</span> = (<span class="ruby-string">'set_'</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">symb</span>.<span class="ruby-identifier">to_s</span>).<span class="ruby-identifier">to_sym</span>
+  <span class="ruby-identifier">method_to_call</span> = (<span class="ruby-node">&quot;#{self.prefix}_&quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">symb</span>.<span class="ruby-identifier">to_s</span>).<span class="ruby-identifier">to_sym</span>
   <span class="ruby-identifier">set_method</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">method</span>(<span class="ruby-identifier">method_to_call</span>)
   
   <span class="ruby-keyword">self</span>[<span class="ruby-ivar">@last_symbol</span>] = <span class="ruby-identifier">set_method</span>.<span class="ruby-identifier">call</span>(<span class="ruby-identifier">parameter</span>)
@@ -1023,7 +1346,7 @@ is custom</p>
             
             <div class="method-source-code" id="raise_config_error-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 277</span>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 391</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">raise_config_error</span>(<span class="ruby-identifier">value</span>, <span class="ruby-identifier">message</span>)
   <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigError</span>, <span class="ruby-identifier">format_error</span>(<span class="ruby-ivar">@last_symbol</span>, <span class="ruby-identifier">value</span>, <span class="ruby-identifier">message</span>), <span class="ruby-identifier">caller</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1056,7 +1379,7 @@ is custom</p>
             
             <div class="method-source-code" id="raise_syntax_error-source">
 <pre>
-<span class="ruby-comment"># File lib/jeckyl.rb, line 281</span>
+<span class="ruby-comment"># File lib/jeckyl.rb, line 395</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">raise_syntax_error</span>(<span class="ruby-identifier">message</span>)
   <span class="ruby-identifier">raise</span> <span class="ruby-constant">ConfigSyntaxError</span>, <span class="ruby-identifier">message</span>, <span class="ruby-identifier">caller</span>
 <span class="ruby-keyword">end</span></pre>
