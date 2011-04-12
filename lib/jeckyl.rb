@@ -11,14 +11,13 @@
 #
 # == JECKYL
 #
+require 'jeckyl/version'
 
 #
 # main configurator class. You can either create an instance of this class and use it in
 # relaxed mode, or create a subclass in which to define various parsing methods. See README
 # for more details of usage.
 #
-
-
 class Jeckyl < Hash
 
   # set this to false if you want unknown methods to be turned into key value pairs regardless
@@ -68,6 +67,11 @@ class Jeckyl < Hash
   end
 
   attr_reader :comments, :order, :defaults
+
+  # return the current version
+  def version
+    Version
+  end
 
   # set the current parameter, a convenience method that uses @last_symbol
 #  def set_param(value)
