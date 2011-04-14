@@ -1,0 +1,8 @@
+jeckyl-0.0.4 14-Apr-2011
+
+Minor Update to fix a superclass error caused by requiring version before the first
+declaration of the Jeckyl class.
+
+jeckyl-0.0.3a 11-Apr-2011
+
+Another slight change

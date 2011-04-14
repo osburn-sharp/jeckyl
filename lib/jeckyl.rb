@@ -11,7 +11,7 @@
 #
 # == JECKYL
 #
-require 'jeckyl/version'
+
 
 #
 # main configurator class. You can either create an instance of this class and use it in
@@ -19,7 +19,9 @@ require 'jeckyl/version'
 # for more details of usage.
 #
 class Jeckyl < Hash
-
+  
+  require 'jeckyl/version'
+  
   # set this to false if you want unknown methods to be turned into key value pairs regardless
   @@strict = true
 

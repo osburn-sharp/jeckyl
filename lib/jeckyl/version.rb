@@ -15,5 +15,6 @@
 class Jeckyl
 
   Version = '0.0.3'
+  Version_Date = '12-Apr-2011'
 
 end
