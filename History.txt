@@ -1,3 +1,10 @@
+== History
+
+jeckyl-0.1.0 18-Apr-2011
+
+Changed structure to module-based due to superclass mismatch errors. This version of
+Jeckyl is not backward compatible.
+
 jeckyl-0.0.4 14-Apr-2011
 
 Minor Update to fix a superclass error caused by requiring version before the first

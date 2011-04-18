@@ -11,17 +11,17 @@
 #
 # == JECKYL
 #
-
+require 'jeckyl/version'
+require 'jeckyl/errors'
 
 #
 # main configurator class. You can either create an instance of this class and use it in
 # relaxed mode, or create a subclass in which to define various parsing methods. See README
 # for more details of usage.
 #
-class Jeckyl < Hash
-  
-  require 'jeckyl/version'
-  
+module Jeckyl
+  class Options < Hash
+
   # set this to false if you want unknown methods to be turned into key value pairs regardless
   @@strict = true
 
@@ -60,7 +60,7 @@ class Jeckyl < Hash
     end
     # and finally get the values from the config file itself
     self.instance_eval(File.read(config_file), config_file)
-    
+
   rescue SyntaxError => err
     raise ConfigSyntaxError, err.message
   rescue Errno::ENOENT
@@ -76,9 +76,9 @@ class Jeckyl < Hash
   end
 
   # set the current parameter, a convenience method that uses @last_symbol
-#  def set_param(value)
-#    self[@last_symbol] = value
-#  end
+  #  def set_param(value)
+  #    self[@last_symbol] = value
+  #  end
 
   # accept undefined parameters and add them to the hash
   def self.relax
@@ -138,7 +138,7 @@ class Jeckyl < Hash
     rescue Errno::ENOENT
       raise ReportFileError, "Error with file: #{report_file}"
     end
-    
+
   end
 
   # a class method to generate a config file from the class definition
@@ -161,7 +161,7 @@ class Jeckyl < Hash
       cfile.puts ""
     end
   end
-  
+
   # set the prefix to the parameter names that should be used for corresponding
   # configure methods defined for a subclass.
   #
@@ -173,14 +173,14 @@ class Jeckyl < Hash
   end
 
 
-protected
+  protected
 
   # create a description for the current parameter, to be used when generating a config template
   def comment(*strings)
     @comments[@last_symbol] = strings unless @last_symbol.nil?
   end
-  
-  # set default value(s) for the current parameter. 
+
+  # set default value(s) for the current parameter.
   #
   def default(val)
     return if @last_symbol.nil? || @defaults.has_key?(@last_symbol)
@@ -324,7 +324,7 @@ protected
   end
 
 
-private
+  private
 
   # decides what to do with parameters that have not been defined.
   # if @@strict then it will raise an exception. Otherwise it will create a key value pair
@@ -338,7 +338,7 @@ private
     #@parameter = parameter
     method_to_call = ("#{self.prefix}_" + symb.to_s).to_sym
     set_method = self.method(method_to_call)
-    
+
     self[@last_symbol] = set_method.call(parameter)
 
   rescue NameError
@@ -367,7 +367,7 @@ private
       if md = /^#{self.prefix}_/.match(method_name) then
 
         # its a set_ method so call it
-        
+
         set_method = self.method(method_name.to_sym)
         # get the corresponding symbol for the hash
         @last_symbol = md.post_match.to_sym
@@ -405,5 +405,7 @@ private
   def format_error(key, value, message)
     "[#{key}]: #{value} - #{message}"
   end
-  
+
+  end
+
 end

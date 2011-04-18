@@ -13,7 +13,7 @@
 #
 require 'jeckyl'
 
-class TestJeckyl < Jeckyl
+class TestJeckyl < Jeckyl::Options
 
   def prefix
     'set'

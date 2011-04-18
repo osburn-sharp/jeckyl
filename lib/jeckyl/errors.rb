@@ -12,7 +12,7 @@
 # 
 # 
 
-class Jeckyl
+module Jeckyl
 
   # A standard class for all Jeckyl exceptions
   class JeckylError < Exception; end
