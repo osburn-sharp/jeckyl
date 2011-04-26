@@ -20,6 +20,10 @@ require 'jeckyl/errors'
 # for more details of usage.
 #
 module Jeckyl
+
+  #default location for all config files
+  ConfigRoot = '/etc/jermine'
+
   class Options < Hash
 
   # set this to false if you want unknown methods to be turned into key value pairs regardless

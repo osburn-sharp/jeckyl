@@ -1,10 +1,10 @@
 # Created by Jevoom
 #
-# 18-Apr-2011
-#   Changed structure to module-based due to superclass mismatch errors. This version of
-#   Jeckyl is not backward compatible.
+# 26-Apr-2011
+#   Added ConfigRoot as the default root for config files
 
 module Jeckyl
-  Version = '0.1.0'
-  Version_Date = '18-Apr-2011'
+  Version = '0.1.1'
+  Version_Date = '26-Apr-2011'
+  Ident = 'jeckyl-0.1.1 26-Apr-2011'
 end

@@ -1,5 +1,9 @@
 == History
 
+jeckyl-0.1.1 26-Apr-2011
+
+Added ConfigRoot as the default root for config files
+
 jeckyl-0.1.0 18-Apr-2011
 
 Changed structure to module-based due to superclass mismatch errors. This version of
