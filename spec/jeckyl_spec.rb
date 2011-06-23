@@ -1,6 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 require 'jeckyl/errors'
 require File.expand_path(File.dirname(__FILE__) + '/../test/test_configurator')
+require File.expand_path(File.dirname(__FILE__) + '/../test/test_configurator_errors')
 
 conf_path = File.expand_path(File.dirname(__FILE__) + '/../test/conf.d')
 
@@ -134,9 +135,9 @@ describe "Jeckyl" do
       lambda{conf = TestJeckyl.new(conf_file)}.should raise_error(Jeckyl::ConfigError, /^\[email\]:.*does not match required pattern:/)
     end
 
-    it "should raise an exception if it gets a patter that is not a pattern" do
+    it "should raise an exception if it gets a pattern that is not a pattern" do
       conf_file = conf_path + '/not_a_pattern'
-      lambda{conf = TestJeckyl.new(conf_file)}.should raise_error(Jeckyl::ConfigSyntaxError, "Attempt to pattern match without a Regexp")
+      lambda{conf = TestJeckylErrors.new(conf_file)}.should raise_error(Jeckyl::ConfigSyntaxError, "Attempt to pattern match without a Regexp")
     end
 
   end
@@ -145,7 +146,7 @@ describe "Jeckyl" do
 
     it "should raise an exception if it gets a set that is not an array" do
       conf_file = conf_path + '/not_a_set'
-      lambda{conf = TestJeckyl.new(conf_file)}.should raise_error(Jeckyl::ConfigSyntaxError, "Sets to test membership must be arrays")
+      lambda{conf = TestJeckylErrors.new(conf_file)}.should raise_error(Jeckyl::ConfigSyntaxError, "Sets to test membership must be arrays")
     end
 
     it "should raise an exception if a value is not in the given set" do

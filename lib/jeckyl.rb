@@ -40,7 +40,7 @@ module Jeckyl
   # opts is an optional hash of default key value pairs used to fill the hash before the config_file is
   # evaluated. Any values defined by the config file will overwrite these defaults.
   #
-  def initialize(config_file=nil, opts={})
+  def initialize(config_file=nil, opts={}, ignore_errors_on_default=false)
     # do whatever a hash has to do
     super()
 
@@ -54,7 +54,7 @@ module Jeckyl
     @order = Array.new
 
     # get the defaults defined in the config parser
-    get_defaults()
+    get_defaults(ignore_errors_on_default)
 
     return self if config_file.nil?
 
@@ -160,7 +160,15 @@ module Jeckyl
           cfile.puts "# #{comment}"
         end
       end
-      default = me.defaults[key]
+      def_value = me.defaults[key]
+      default = case def_value.class
+      when String
+        '"' + def_value + '"'
+      when Symbol
+        ":#{def_value}"
+      else
+        "#{def_value}"
+      end
       cfile.puts "##{key.to_s} #{default}"
       cfile.puts ""
     end
@@ -364,7 +372,7 @@ module Jeckyl
   # defined for each will be passed back and used to set the hash before the
   # config file is evaluated.
   #
-  def get_defaults
+  def get_defaults(ignore_errors)
 
     # go through all of the methods
     self.methods.each do |method_name|
@@ -387,8 +395,9 @@ module Jeckyl
           # which may be different if the method transforms
           # the parameter!
           param = @defaults[@last_symbol]
-          self[@last_symbol] = set_method.call(param)
+          self[@last_symbol] = set_method.call(param) unless param.nil?
         rescue Exception
+          raise unless ignore_errors
           # ignore any errors
         end
       end

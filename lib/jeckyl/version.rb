@@ -1,10 +1,10 @@
 # Created by Jevoom
 #
-# 26-Apr-2011
-#   Added ConfigRoot as the default root for config files
+# 23-Jun-2011
+#   Update to check that defaults meet specified rules properly, and handle strings and symbols when generating files
 
 module Jeckyl
-  Version = '0.1.1'
-  Version_Date = '26-Apr-2011'
-  Ident = 'jeckyl-0.1.1 26-Apr-2011'
+  Version = '0.1.2'
+  Version_Date = '23-Jun-2011'
+  Ident = 'jeckyl-0.1.2 23-Jun-2011'
 end

@@ -13,7 +13,7 @@
 #
 require 'jeckyl'
 
-class TestJeckyl < Jeckyl::Options
+class TestJeckylErrors < Jeckyl::Options
 
   def prefix
     'set'
@@ -90,16 +90,16 @@ class TestJeckyl < Jeckyl::Options
     a_matching_string(email, /^[a-z]+\@[a-z][a-z\-\.]+[a-z]$/)
   end
 
-#  def set_invalid_set(member)
-#    default 1
-#    invalid_set = {:one=>1, :two=>2, :three=>3}
-#    a_member_of(member, invalid_set)
-#  end
-#
-#  def set_invalid_pattern(email)
-#    default "me@work.org.uk"
-#    pattern = "email"
-#    a_matching_string(email, pattern)
-#  end
+  def set_invalid_set(member)
+    default 1
+    invalid_set = {:one=>1, :two=>2, :three=>3}
+    a_member_of(member, invalid_set)
+  end
+
+  def set_invalid_pattern(email)
+    default "me@work.org.uk"
+    pattern = "email"
+    a_matching_string(email, pattern)
+  end
 
 end
