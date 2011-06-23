@@ -1,5 +1,9 @@
 == History
 
+jeckyl-0.1.3 23-June-2011
+
+Minor tweak to get string handling working properly for generating configs
+
 jeckyl-0.1.2 23-June-2011
 
 Update to check that defaults meet specified rules properly, and handle strings and symbols when generating files

@@ -161,10 +161,12 @@ module Jeckyl
         end
       end
       def_value = me.defaults[key]
-      default = case def_value.class
-      when String
+
+      # seems to need to be converted to a string to work here
+      default = case def_value.class.to_s
+      when "String"
         '"' + def_value + '"'
-      when Symbol
+      when "Symbol"
         ":#{def_value}"
       else
         "#{def_value}"
