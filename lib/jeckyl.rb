@@ -40,7 +40,7 @@ module Jeckyl
   # opts is an optional hash of default key value pairs used to fill the hash before the config_file is
   # evaluated. Any values defined by the config file will overwrite these defaults.
   #
-  def initialize(config_file=nil, opts={}, ignore_errors_on_default=false)
+  def initialize(config_file=nil, opts={}, ignore_errors_on_default=true)
     # do whatever a hash has to do
     super()
 

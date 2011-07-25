@@ -1,10 +1,10 @@
 # Created by Jevoom
 #
-# 23-Jun-2011
-#   Minor tweak to get string handling working properly for generating configs
+# 25-Jul-2011
+#   changed ignore_errors_on_default to true as the default
 
 module Jeckyl
-  Version = '0.1.3'
-  Version_Date = '23-Jun-2011'
-  Ident = 'jeckyl-0.1.3 23-Jun-2011'
+  Version = '0.1.4'
+  Version_Date = '25-Jul-2011'
+  Ident = 'jeckyl-0.1.4 25-Jul-2011'
 end
