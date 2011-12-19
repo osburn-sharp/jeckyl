@@ -1,5 +1,9 @@
 == History
 
+jeckyl-0.1.6 19-Dec-2011
+
+Correct silly typo in config_file change
+
 jeckyl-0.1.5 19-Dec-2011
 
 Add :config_file to self to remember where the config file is

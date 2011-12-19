@@ -63,7 +63,7 @@ module Jeckyl
       self[key] = value
     end
     # remember where the config file itself is
-    self[:config_file] = confile_file
+    self[:config_file] = config_file
     
     # and finally get the values from the config file itself
     self.instance_eval(File.read(config_file), config_file)
