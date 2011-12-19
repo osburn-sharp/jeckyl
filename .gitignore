@@ -19,3 +19,10 @@ rdoc
 pkg
 
 ## PROJECT::SPECIFIC
+
+## redcar
+.redcar/**/*
+
+## Gems
+*.gem
+

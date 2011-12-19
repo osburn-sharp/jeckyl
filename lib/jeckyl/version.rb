@@ -1,10 +1,10 @@
 # Created by Jevoom
 #
-# 25-Jul-2011
-#   changed ignore_errors_on_default to true as the default
+# 19-Dec-2011
+#   Add :config_file to self to remember where the config file is
 
 module Jeckyl
-  Version = '0.1.4'
-  Version_Date = '25-Jul-2011'
-  Ident = 'jeckyl-0.1.4 25-Jul-2011'
+  Version = '0.1.5'
+  Version_Date = '19-Dec-2011'
+  Ident = 'jeckyl-0.1.5 19-Dec-2011'
 end

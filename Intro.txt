@@ -1,8 +1,4 @@
-== JECKYL
-
-== Jumpin' Ermin's Configurator for Kwit and easY Linux services
-
-Create an options hash from a simple config file to be used to configure a ruby service, Safely!
-Define permitted options, their defauls, checking rules and even comments in one simple class. This
+Create an options hash from a simple ruby config file to be used to configure a ruby service, Safely!
+Define permitted options, their defaults, checking rules and even comments in one simple class. This
 is then used to parse the config file and create the options hash. And a config-checker and config-file
 generator can be easily created by modifying standard templates to suit your config class.

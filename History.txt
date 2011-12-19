@@ -1,5 +1,9 @@
 == History
 
+jeckyl-0.1.5 19-Dec-2011
+
+Add :config_file to self to remember where the config file is
+
 jeckyl-0.1.4 25-July-2011
 
 changed ignore_errors_on_default to true as the default
