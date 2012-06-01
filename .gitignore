@@ -21,9 +21,10 @@ pkg
 ## PROJECT::SPECIFIC
 
 ## redcar
-.redcar
+.redcar/
 .redcar/**/*
 
 ## Gems
 *.gem
 
+doc/

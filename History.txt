@@ -1,5 +1,10 @@
 == History
 
+jeckyl-0.1.7 1-June-2012
+
+Added Jeckyl::Service as a class which already defines all of the config options needed
+for a Jerbil::Service
+
 jeckyl-0.1.6 19-Dec-2011
 
 Correct silly typo in config_file change

@@ -1,0 +1,8 @@
+=== BUGS
+
+23-June-2011
+
+Test defaults for string types and put in quotes when generating config files
+Also, should be able to run defaults through the same tests as supplied values!
+
+Done in 0.1.3

@@ -1,10 +1,14 @@
 # Created by Jevoom
 #
-# 19-Dec-2011
-#   Correct silly typo in config_file change
+# 01-Jun-2012
+#   Added Jeckyl::Service as a class which already defines all of the config options needed
+#   for a Jerbil::Service
 
 module Jeckyl
-  Version = '0.1.6'
-  Version_Date = '19-Dec-2011'
-  Ident = 'jeckyl-0.1.6 19-Dec-2011'
+  # version set to 0.1.7
+  Version = '0.1.7'
+  # date set to 01-Jun-2012
+  Version_Date = '01-Jun-2012'
+  #ident string set to: jeckyl-0.1.7 01-Jun-2012
+  Ident = 'jeckyl-0.1.7 01-Jun-2012'
 end
