@@ -1,5 +1,9 @@
 == History
 
+jeckyl-0.1.8 2-June-2012
+
+Made sure Jeckyl::Service inherits from Jeckyl::Options!
+
 jeckyl-0.1.7 1-June-2012
 
 Added Jeckyl::Service as a class which already defines all of the config options needed

@@ -23,7 +23,7 @@ module Jeckyl
   #
   # check the comment calls below for details
   #
-  class Service
+  class Service < Jeckyl::Options
     
     def configure_environment(env)
         default :prod
