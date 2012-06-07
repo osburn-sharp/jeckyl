@@ -15,6 +15,7 @@
 #
 # 
 #
+require 'jeckyl'
 
 module Jeckyl
   
@@ -100,6 +101,14 @@ module Jeckyl
       
       a_type_of(name, String)
     end
+    
+    def configure_exit_on_stop(bool)
+      default true
+      comment "Boolean - set to false to prevent service from executing exit! on stop"
+
+      a_boolean(bool)
+    end
+    
     
   end
 end

@@ -1,5 +1,9 @@
 == History
 
+jeckyl-0.1.9 6-June-2012
+
+Included require 'jeckyl' in service.rb
+
 jeckyl-0.1.8 2-June-2012
 
 Made sure Jeckyl::Service inherits from Jeckyl::Options!
