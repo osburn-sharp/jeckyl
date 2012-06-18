@@ -2,12 +2,23 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 require 'jeckyl/errors'
 require File.expand_path(File.dirname(__FILE__) + '/../test/test_configurator')
 require File.expand_path(File.dirname(__FILE__) + '/../test/test_configurator_errors')
+require File.expand_path(File.dirname(__FILE__) + '/../test/test_class')
+require File.expand_path(File.dirname(__FILE__) + '/../test/test_subclass')
 
 conf_path = File.expand_path(File.dirname(__FILE__) + '/../test/conf.d')
 
 describe "Jeckyl" do
 
   # general tests
+  
+  it "should return the defaults" do
+    conf = TestJeckyl.new(File.join(conf_path, 'defaults.rb'))
+    conf[:log_dir].should == '/tmp'
+    conf[:key_file].should be_nil
+    conf[:log_level].should == :verbose
+    conf[:log_rotation].should == 5
+    conf[:threshold].should == 5.0
+  end
 
   it "should create a simple config" do
     #TestJeckyl.debug(true)
@@ -167,6 +178,22 @@ describe "Jeckyl" do
       conf[:my_age].should == 50
     end
 
+  end
+  
+  describe "find the parameters for a specific class" do
+    it "should sift out the parameters" do
+      bconf = File.join(conf_path, 'bclass.rb')
+      opts = Bclass.new(bconf)
+      opts.length.should == 4
+      subopts = Aclass.intersection(opts)
+      subopts.length.should ==2
+      subopts.has_key?(:a_bool).should be_true
+      subopts.has_key?(:no_def).should be_true
+      opts.complement(subopts)
+      opts.length.should == 2
+      opts.has_key?(:config_file).should be_true
+      opts.has_key?(:another).should be_true
+    end
   end
 
 end

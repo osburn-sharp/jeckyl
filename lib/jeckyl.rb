@@ -24,6 +24,11 @@ module Jeckyl
   #default location for all config files
   ConfigRoot = '/etc/jermine'
 
+  # This is the main Jeckyl class from which to create specific parameter
+  # classes. For example, to create a new set of parameters, define a class as
+  #
+  #  class MyParams < Jeckyl;;Options
+  #
   class Options < Hash
 
   # set this to false if you want unknown methods to be turned into key value pairs regardless
@@ -32,13 +37,17 @@ module Jeckyl
   # may be useful?
   @@debug = false
 
-  # create a configuration object
+  # create a configuration hash by evaluating the parameters defined in the given config file.
   #
-  # The config_file is a string path to a ruby config file that will be evaluated and converted into
-  # key value pairs
+  # @param [String] config_file string path to a ruby file,
+  # @param [Hash] opts is an optional hash of default key value pairs.
+  # @param [Boolean] ignore_errors_on_default does what?
   #
-  # opts is an optional hash of default key value pairs used to fill the hash before the config_file is
-  # evaluated. Any values defined by the config file will overwrite these defaults.
+  # If no config file is given then the hash of options returned will only have
+  # the defaults defined for the given class.
+  #
+  # The opts given will override the class defaults or add to them, but will be overriden by
+  # the values in the config_file
   #
   def initialize(config_file=nil, opts={}, ignore_errors_on_default=true)
     # do whatever a hash has to do
@@ -75,17 +84,20 @@ module Jeckyl
     raise ConfigFileMissing, "#{config_file}"
   end
 
-  attr_reader :comments, :order, :defaults
+  # gives access to a hash containing an entry for each parameter and the comments
+  # defined by the class definitions
+  attr_reader :comments
+  
+  # This contains an array of the parameter names
+  attr_reader :order
+  
+  # this contains a hash of the defaults for each parameter
+  attr_reader :defaults
 
   # return the current version
   def version
     Version
   end
-
-  # set the current parameter, a convenience method that uses @last_symbol
-  #  def set_param(value)
-  #    self[@last_symbol] = value
-  #  end
 
   # accept undefined parameters and add them to the hash
   def self.relax
@@ -98,6 +110,7 @@ module Jeckyl
     @@strict = true
   end
 
+  # @deprecated Does not appear to be used for anything
   def self.debug=(val)
     @@debug = (val)
   end
@@ -109,6 +122,10 @@ module Jeckyl
   #
   # To use this method, it is necessary to write a script that calls it for the particular
   # subclass.
+  #
+  # @param [String] config_file is the file to check
+  # @param [String] report_file is a file to write the report to, or stdout
+  # @return [Boolean] indicates if the check was OK or not
   #
   def self.check_config(config_file, report_file=nil)
 
@@ -153,6 +170,8 @@ module Jeckyl
   # This calls each of the set_ methods, as in get_defaults, and creates a commented template
   # with the descriptions and default lines
   #
+  # @param [File] cfile is the output file
+  #
   def self.generate_config(cfile=$stdout)
     me = self.new
     # everything should now exist
@@ -178,6 +197,33 @@ module Jeckyl
       cfile.puts ""
     end
   end
+  
+  # extract only those parameters in a hash that are from the given class
+  #
+  # @param [Jeckyl::Options] full_config is the config from which to extract the intersecting options
+  #
+  def self.intersection(full_config)
+    me = self.new # create the defauls for this class
+    my_hash = {}
+    me.order.each do |my_key|
+      if full_config.has_key?(my_key) then
+        my_hash[my_key] = full_config[my_key]
+      end
+    end
+    return my_hash
+  end
+  
+  # return a list of descendant classes in the current context. This is provided to help
+  # find classes for the jeckyl utility, e.g. to generate a default config file
+  #
+  # @return [Array] classes that are descendants of this class
+  #
+  def self.descendants
+    descs = Array.new
+    ObjectSpace.each_object {|obj| descs << obj if obj.kind_of?(Class) && obj < self}
+    return descs
+  end
+  
 
   # set the prefix to the parameter names that should be used for corresponding
   # configure methods defined for a subclass.
@@ -188,10 +234,24 @@ module Jeckyl
   def prefix
     'configure'
   end
+  
+  # return only those parameters that are not in the given hash, useful for tailoring
+  # parameter sets to specific uses (e.g. removing logging parameters)
+  def complement(conf_to_remove)
+    self.delete_if {|key, value| conf_to_remove.has_key?(key)}
+    # new_hsh = {}
+    # puts "HEY"
+    # self.each_pair do |key, value| 
+    #   puts "#{key}:#{value}"
+    #   new_hsh[key] = value unless conf_to_remove.has_key?(key)
+    # end
+    # puts new_hsh.inspect
+    # return new_hsh
+  end
 
 
   protected
-
+  
   # create a description for the current parameter, to be used when generating a config template
   def comment(*strings)
     @comments[@last_symbol] = strings unless @last_symbol.nil?

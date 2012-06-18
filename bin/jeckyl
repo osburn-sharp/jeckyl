@@ -1,0 +1,154 @@
+#!/usr/bin/env ruby18
+#
+# Description
+#
+# Author:: Robert Sharp
+# Copyright:: Copyright (c) 2010 Robert Sharp
+# License:: Open Software Licence v3.0
+#
+# This software is licensed for use under the Open Software Licence v. 3.0
+# The terms of this licence can be found at http://www.opensource.org/licenses/osl-3.0.php
+# and in the file copyright.txt. Under the terms of this licence, all derivative works
+# must themselves be licensed under the Open Software Licence v. 3.0
+# 
+#
+# replace this to point to your config class
+# require 'my_jeckyl_configurator'
+require 'rubygems' # want to find classes that might be in gems
+require 'jeckyl'
+require 'jeckyl/errors'
+require 'thor'
+require 'thor/group'
+require 'colored'
+
+# Part of JeckylCLI - the command line interpreter for Jeckyl
+# a trivial module to share a method between thor groups
+module Support
+  # list the classes to select from
+  def display_classes(classes)
+    $stderr.puts "Select one of the following classes:"
+    classes.each do |klass|
+      $stderr.puts "  #{klass.name}"
+    end
+  end
+end
+
+# the Command Line Interface for jeckyl to allow users to generate
+# config files, generate a simple template or check a config file
+class JeckylCLI < Thor
+  
+  # a Thor group of commands under "generate"
+  class Generator < Thor
+  
+    desc "config", "generate config file for the given config class"
+    def config(cfile, my_class_name=nil)
+      
+      require cfile # catch LoadError if cfile does not load
+      
+      my_class_index = 0 # assume there is only one
+      
+      classes = Jeckyl::Options.descendants
+      
+      if classes.length > 1 then
+        
+        unless my_class_name
+          # caller did not select a class
+          display_classes(classes)
+          return false
+          
+        else
+          my_class_index = nil # there is more than one
+          classes.each_index do |ind|
+            my_class_index = ind if classes[ind].name == my_class_name
+          end
+          unless my_class_index
+            # user did not select a valis class
+            $stderr.puts "Error: given class name is not valid: #{my_class_name}".red
+            display_classes(classes)
+            return false
+          end
+        end
+      end
+      
+      classes[my_class_index].generate_config
+  
+    rescue LoadError
+      puts "Error: could not load #{cfile}".red
+    end
+    
+    desc "klass", "generate a simple class template"
+    def klass(name, parent="Jeckyl::Options")
+      puts <<EOTXT
+# Simple framework for defining Jeckyl options to put into a config hash
+
+module #{name}
+  
+  class Options < #{parent}
+    
+    def configure_a_parameter(val)
+      default "default"
+      comment "Comment line",
+        "more comments"
+      a_type_of(String)
+    end
+    
+  end
+end
+EOTXT
+    
+    end
+    
+    no_tasks do
+      include Support
+    end
+    
+  end # Generator
+  
+  # make it a thor group - jeckyl generate config etc
+  register Generator, :generate, "generate", "generate things"
+  
+  
+  desc "check", "check the given config file is valid"
+  def check(klass_file, conf_file, klass_name=nil)
+    
+    require klass_file # catch LoadError if cfile does not load
+    
+    my_class_index = 0 # assume there is only one
+    
+    classes = Jeckyl::Options.descendants
+    
+    if classes.length > 1 then
+      
+      unless klass_name
+        # caller did not select a class
+        display_classes(classes)
+        return false
+        
+      else
+        my_class_index = nil # there is more than one
+        classes.each_index do |ind|
+          my_class_index = ind if classes[ind].name == klass_name
+        end
+        unless my_class_index
+          # user did not select a valis class
+          $stderr.puts "Error: given class name is not valid: #{my_class_name}".red
+          display_classes(classes)
+          return false
+        end
+      end
+    end
+    
+    classes[my_class_index].check_config(conf_file)
+
+  rescue LoadError
+    puts "Error: could not load #{cfile}".red
+    
+  end
+  
+  no_tasks do
+    include Support
+  end
+
+end
+
+JeckylCLI.start
