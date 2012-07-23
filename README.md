@@ -251,6 +251,16 @@ A simple template can be generated as follows:
 This will create a very simple template for a module <name> and a class Options that 
 will be a descendant of parent or Jeckyl::Options if not parent is specified.
 
+There is also a command that generates a markdown file containing all of the comments, so that you can
+easily include them in your yard docs. Run the command:
+
+    $ jeckyl comment path/to/config_class [class_name] >lib/project/config_comments.md
+    
+It seems to be difficult to get this markdown into the yard docs, but one way is to add it
+as a @see tag:
+
+    # @see file:lib/project/config_comments.md
+
 Finally:
 
     $ jeckyl check <class> <conf> [class_name]
@@ -277,7 +287,7 @@ Details of bugs can be found in {file:Bugs.rdoc}
 
 ## Author and Contact
 
-I am Robert Sharp and you can contat me on [GitHub](http://github.com/osburn-sharp)
+I am Robert Sharp and you can contact me on [GitHub](http://github.com/osburn-sharp)
 
 ## Copyright and Licence
 

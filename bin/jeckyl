@@ -145,6 +145,75 @@ EOTXT
     
   end
   
+  desc "comments", "display the comments from a class as a class header"
+  def comments(klass_file, klass_name=nil)
+    
+    require klass_file # catch LoadError if cfile does not load
+    
+    my_class_index = 0 # assume there is only one
+    
+    classes = Jeckyl::Options.descendants
+    
+    if classes.length > 1 then
+      
+      unless klass_name
+        # caller did not select a class
+        display_classes(classes)
+        return false
+        
+      else
+        my_class_index = nil # there is more than one
+        classes.each_index do |ind|
+          my_class_index = ind if classes[ind].name == klass_name
+        end
+        unless my_class_index
+          # user did not select a valis class
+          $stderr.puts "Error: given class name is not valid: #{my_class_name}".red
+          display_classes(classes)
+          return false
+        end
+      end
+    end
+    
+    my_configurator = classes[my_class_index].new
+    names = classes[my_class_index].to_s.split('::')
+    
+    puts "# #{names[0]} Parameters"
+    
+    puts "The following parameters are defined in #{names.join('::')} and should be used"
+    puts "in a configuration file. This file can be generated using:"
+    puts ""
+    puts "    jeckyl config #{File.expand_path(klass_file)}"
+    puts ""
+    if classes.length > 1 then
+      puts ""
+      puts "**Warning**: there is more than one config class to choose from. The above"
+      puts "command will prompt you to add a classname. To generate a config file for this class"
+      puts "type:"
+      puts ""
+      puts "    jeckyl config #{File.expand_path(klass_file)} #{names.join('::')}"
+      puts ""
+    end
+    
+    puts "## Parameters"
+    puts ""
+    
+    my_configurator.comments.each do |param, comment|
+      puts " * **#{param}**"
+      puts " "
+      comment.each {|line| puts "    #{line}"}
+      puts ""
+    end
+    # puts "  class #{names[1]} < #{classes[my_class_index].superclass}"
+    # puts ""
+    # puts "  end"
+    # puts "end"
+
+  rescue LoadError
+    puts "Error: could not load #{cfile}".red
+    
+  end
+  
   no_tasks do
     include Support
   end

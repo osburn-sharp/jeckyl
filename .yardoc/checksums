@@ -3,5 +3,5 @@ lib/jeckyl/service.rb 6cecd7f46e604b74c2206a602076926f38452cd2
 lib/jeckyl/errors.rb a3bf594cf8fdc98d5e9f6fb4d492cdabb6cf87ee
 README.rdoc 35cc73bb8ec76e9934273a3cbc1faa70d445fe8d
 lib/jeckyl.rb f29c171501e12c639138ec219667ac1f3bdcbefa
-bin/jeckyl e068f5c0d17a42a7d0cd09b09f7abb667ee74f09
-lib/jeckyl/version.rb 4a94010015a6cdd097511dddfd51b2f1ebfbcbf1
+bin/jeckyl 2ca6e143b5bebad210e7e7c74f9625c99e5699b9
+lib/jeckyl/version.rb ab708d514397de6e2c9a4eaea86647b011173520

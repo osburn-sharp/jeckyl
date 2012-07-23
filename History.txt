@@ -4,6 +4,10 @@
 
 == History
 
+[jeckyl-0.1.11 23-Jul-2012]
+
+  Added comment command to jeckyl to produce just comments for yard
+
 [jeckyl-0.1.10 18-June-2012]
 
   Added complement and intersection methods and deprecated new Jeckyl::Service in favour of
