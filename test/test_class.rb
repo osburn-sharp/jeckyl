@@ -16,7 +16,7 @@
 # 
 #
 
-require 'jeckyl'
+#require 'jeckyl'
 
 class Aclass < Jeckyl::Options
   

@@ -15,64 +15,60 @@ require 'jeckyl/version'
 require 'jeckyl/errors'
 
 #
-# main configurator class. You can either create an instance of this class and use it in
-# relaxed mode, or create a subclass in which to define various parsing methods. See README
-# for more details of usage.
+# The Jeckyl configurator module, which is just a wrapper. See {file:README.md Readme} for details.
 #
 module Jeckyl
 
   #default location for all config files
   ConfigRoot = '/etc/jermine'
 
-  # This is the main Jeckyl class from which to create specific parameter
+  # This is the main Jeckyl class from which to create specific application
   # classes. For example, to create a new set of parameters, define a class as
   #
-  #  class MyParams < Jeckyl;;Options
+  #    class MyConfig < Jeckyl::Config
   #
-  class Options < Hash
-
-  # set this to false if you want unknown methods to be turned into key value pairs regardless
-  @@strict = true
-
-  # may be useful?
-  @@debug = false
+  # More details are available in the {file:README.md Readme} file
+  class Config < Hash
 
   # create a configuration hash by evaluating the parameters defined in the given config file.
   #
   # @param [String] config_file string path to a ruby file,
-  # @param [Hash] opts is an optional hash of default key value pairs.
-  # @param [Boolean] ignore_errors_on_default does what?
+  # @param [Hash] opts contains the following options.
+  # @option opts [Boolean] :flag_errors_on_defaults will raise exceptions from checks during default
+  #  evaluation - although why is not clear, so best not to use it.
+  # @option opts [Boolean] :local limits generated defaults to the direct class being evaluated
+  #   and should only be set internally on this call
+  # @option opts [Boolean] :relax, if set to true will not check for parameter methods but instead
+  #   add unknown methods to the hash unchecked.
   #
   # If no config file is given then the hash of options returned will only have
   # the defaults defined for the given class.
   #
-  # The opts given will override the class defaults or add to them, but will be overriden by
-  # the values in the config_file
   #
-  def initialize(config_file=nil, opts={}, ignore_errors_on_default=true)
+  def initialize(config_file=nil, opts={})
     # do whatever a hash has to do
     super()
+    
+    flag_errors_on_defaults = opts[:flag_errors_on_defaults] || false
+    local = opts[:local] || false
+    @_relax = opts[:relax] || false
 
     # somewhere to save the most recently set symbol
-    @last_symbol = nil
+    @_last_symbol = nil
     # hash for comments accessed with the same symbol
-    @comments = {}
+    @_comments = {}
     # hash for input defaults
-    @defaults={}
+    @_defaults={}
     # save order in which methods are defined for generating config files
-    @order = Array.new
+    @_order = Array.new
 
     # get the defaults defined in the config parser
-    get_defaults(ignore_errors_on_default)
+    get_defaults(:local=> local, :flag_errors => flag_errors_on_defaults)
 
     return self if config_file.nil?
 
-    # now add/override with whatever was passed in
-    opts.each_pair do |key, value|
-      self[key] = value
-    end
     # remember where the config file itself is
-    self[:config_file] = config_file
+    self[:config_files] = [config_file]
     
     # and finally get the values from the config file itself
     self.instance_eval(File.read(config_file), config_file)
@@ -85,34 +81,19 @@ module Jeckyl
   end
 
   # gives access to a hash containing an entry for each parameter and the comments
-  # defined by the class definitions
-  attr_reader :comments
+  # defined by the class definitions - used internally by class methods
+  def comments
+    @_comments
+  end
   
-  # This contains an array of the parameter names
-  attr_reader :order
+  # This contains an array of the parameter names - used internally by class methods
+  def order
+    @_order
+  end
   
-  # this contains a hash of the defaults for each parameter
-  attr_reader :defaults
-
-  # return the current version
-  def version
-    Version
-  end
-
-  # accept undefined parameters and add them to the hash
-  def self.relax
-    @@strict = false
-  end
-
-  # reset to default strict behaviour. Not really needed (unless there are multiple files)
-  # but useful perhaps for testing
-  def self.strict
-    @@strict = true
-  end
-
-  # @deprecated Does not appear to be used for anything
-  def self.debug=(val)
-    @@debug = (val)
+  # this contains a hash of the defaults for each parameter - used internally by class methods
+  def defaults
+    @_defaults
   end
 
   # a class method to check a given config file one item at a time
@@ -167,43 +148,40 @@ module Jeckyl
 
   # a class method to generate a config file from the class definition
   #
-  # This calls each of the set_ methods, as in get_defaults, and creates a commented template
-  # with the descriptions and default lines
+  # This calls each of the parameter methods, and creates a commented template
+  # with the comments and default lines
   #
-  # @param [File] cfile is the output file
+  # @param [Boolean] local when set to true will limit the parameters to those defined in the
+  #  immediate class and excludes any ancestors.
   #
-  def self.generate_config(cfile=$stdout)
-    me = self.new
+  def self.generate_config(local=false)
+    me = self.new(nil, :local => local)
     # everything should now exist
     me.order.each do |key|
 
       if me.comments.has_key?(key) then
         me.comments[key].each do |comment|
-          cfile.puts "# #{comment}"
+          puts "# #{comment}"
         end
       end
       def_value = me.defaults[key]
+      default = def_value.nil? ? '' : def_value.inspect
 
-      # seems to need to be converted to a string to work here
-      default = case def_value.class.to_s
-      when "String"
-        '"' + def_value + '"'
-      when "Symbol"
-        ":#{def_value}"
-      else
-        "#{def_value}"
-      end
-      cfile.puts "##{key.to_s} #{default}"
-      cfile.puts ""
+      puts "##{key.to_s} #{default}"
+      puts ""
     end
   end
   
   # extract only those parameters in a hash that are from the given class
   #
-  # @param [Jeckyl::Options] full_config is the config from which to extract the intersecting options
+  # @param [Hash] full_config is the config from which to extract the intersecting options
+  #  and it can be an instance of Jeckyl::Config or a hash 
+  # @return [Hash] containing all of the intersecting parameters
+  #
+  # Note this returns a plain hash and not an instance of Jeckyl::Config
   #
   def self.intersection(full_config)
-    me = self.new # create the defauls for this class
+    me = self.new # create the defaults for this class
     my_hash = {}
     me.order.each do |my_key|
       if full_config.has_key?(my_key) then
@@ -216,59 +194,90 @@ module Jeckyl
   # return a list of descendant classes in the current context. This is provided to help
   # find classes for the jeckyl utility, e.g. to generate a default config file
   #
-  # @return [Array] classes that are descendants of this class
+  # @return [Array] classes that are descendants of this class, sorted with the least ancestral
+  #  first
   #
   def self.descendants
     descs = Array.new
     ObjectSpace.each_object {|obj| descs << obj if obj.kind_of?(Class) && obj < self}
+    descs.sort! {|a,b| a < b ? -1 : 1}
     return descs
   end
   
 
   # set the prefix to the parameter names that should be used for corresponding
-  # configure methods defined for a subclass.
+  # parameter methods defined for a subclass. Parameter names in config files 
+  # are mapped onto parameter method by prefixing the methods with the results of
+  # this function. So, for a parameter named 'greeting', the parameter method used
+  # to check the parameter will be, by default, 'configure_greeting'.
   #
-  # For example, parameter log_rotation will call configure_log_rotation by default
-  # unless the subclass defines this method differently
+  # For example, to define parameter methods prefix with 'set' redefine this
+  # method to return 'set'. The greeting parameter method should then be called
+  # 'set_greeting'
   #
   def prefix
     'configure'
   end
   
-  # return only those parameters that are not in the given hash, useful for tailoring
-  # parameter sets to specific uses (e.g. removing logging parameters)
+  # Delete those parameters that are in the given hash from this instance of Jeckyl::Config.
+  # Useful for tailoring parameter sets to specific uses (e.g. removing logging parameters)
+  #
+  # @param [Hash] conf_to_remove which is a hash or an instance of Jeckyl::Config
+  #
   def complement(conf_to_remove)
     self.delete_if {|key, value| conf_to_remove.has_key?(key)}
-    # new_hsh = {}
-    # puts "HEY"
-    # self.each_pair do |key, value| 
-    #   puts "#{key}:#{value}"
-    #   new_hsh[key] = value unless conf_to_remove.has_key?(key)
-    # end
-    # puts new_hsh.inspect
-    # return new_hsh
+  end
+  
+  # Read, check and merge another parameter file into this one, being of the same config class.
+  #
+  # @param [String] conf_file - path to file to parse
+  #
+  def merge(conf_file)
+    
+    self[:config_files] << conf_file
+    
+    # and finally get the values from the config file itself
+    self.instance_eval(File.read(conf_file), conf_file)
+
+  rescue SyntaxError => err
+    raise ConfigSyntaxError, err.message
+  rescue Errno::ENOENT
+    # duff file path so tell the caller
+    raise ConfigFileMissing, "#{conf_file}"
   end
 
 
   protected
   
   # create a description for the current parameter, to be used when generating a config template
+  #
+  # @param [*String] being one or more string arguments that are used to generate config file templates
+  #  and documents
   def comment(*strings)
-    @comments[@last_symbol] = strings unless @last_symbol.nil?
+    @_comments[@_last_symbol] = strings unless @_last_symbol.nil?
   end
 
   # set default value(s) for the current parameter.
   #
+  # @param [Object] val - any valid object as expected by the parameter method
   def default(val)
-    return if @last_symbol.nil? || @defaults.has_key?(@last_symbol)
-    @defaults[@last_symbol] = val
+    return if @_last_symbol.nil? || @_defaults.has_key?(@_last_symbol)
+    @_defaults[@_last_symbol] = val
   end
 
   # the following are all helper methods to parse values and raise exceptions if the values are not correct
 
   # file helpers - meanings should be apparent
-
+  
   # check that the parameter is a directory and that the directory is writable
+  #
+  # Jeckyl checking method to be used in parameter methods to check the validity of
+  # given parameters, returning the parameter if valid or else raising an exception
+  # which is either ConfigError if the parameter fails the check or ConfigSyntaxError if
+  # the parameter is not validly formed
+  #
+  # @param [String] - path
+  #
   def a_writable_dir(path)
     if FileTest.directory?(path) && FileTest.writable?(path) then
       path
@@ -278,6 +287,14 @@ module Jeckyl
   end
 
   # check parameter is a readable file
+  #
+  # Jeckyl checking method to be used in parameter methods to check the validity of
+  # given parameters, returning the parameter if valid or else raising an exception
+  # which is either ConfigError if the parameter fails the check or ConfigSyntaxError if
+  # the parameter is not validly formed
+  #
+  # @param [String] - path to file
+  #
   def a_readable_file(path)
     if FileTest.readable?(path) then
       path
@@ -289,6 +306,15 @@ module Jeckyl
   # simple type helpers
 
   # check the parameter is of the required type
+  #
+  # Jeckyl checking method to be used in parameter methods to check the validity of
+  # given parameters, returning the parameter if valid or else raising an exception
+  # which is either ConfigError if the parameter fails the check or ConfigSyntaxError if
+  # the parameter is not validly formed
+  #
+  # @param [Object] obj to check type of
+  # @param [Class] type, being a class constant such as Numeric, String
+  #
   def a_type_of(obj, type)
     if obj.kind_of?(type) then
       obj
@@ -298,6 +324,16 @@ module Jeckyl
   end
 
   # check that the parameter is within the required range
+  #
+  # Jeckyl checking method to be used in parameter methods to check the validity of
+  # given parameters, returning the parameter if valid or else raising an exception
+  # which is either ConfigError if the parameter fails the check or ConfigSyntaxError if
+  # the parameter is not validly formed
+  #
+  # @param [Numeric] val to check
+  # @param [Numeric] lower bound of range
+  # @param [Numeric] upper bound of range
+  #
   def in_range(val, lower, upper)
     raise_syntax_error("#{lower.to_s}..#{upper.to_s} is not a range") unless (lower .. upper).kind_of?(Range)
     if (lower .. upper) === val then
@@ -311,6 +347,14 @@ module Jeckyl
   # boolean helpers
 
   # check parameter is a boolean, true or false but not strings "true" or "false"
+  #
+  # Jeckyl checking method to be used in parameter methods to check the validity of
+  # given parameters, returning the parameter if valid or else raising an exception
+  # which is either ConfigError if the parameter fails the check or ConfigSyntaxError if
+  # the parameter is not validly formed
+  #
+  # @param [Boolean] val to check
+  #
   def a_boolean(val)
     if val.kind_of?(TrueClass) || val.kind_of?(FalseClass) then
       val
@@ -321,6 +365,14 @@ module Jeckyl
 
   # check the parameter is a flag, being "true", "false", "yes", "no", "on", "off", or 1 , 0
   # and return a proper boolean
+  #
+  # Jeckyl checking method to be used in parameter methods to check the validity of
+  # given parameters, returning the parameter if valid or else raising an exception
+  # which is either ConfigError if the parameter fails the check or ConfigSyntaxError if
+  # the parameter is not validly formed
+  #
+  # @param [String] val to check
+  #
   def a_flag(val)
     val = val.downcase if val.kind_of?(String)
     case val
@@ -337,6 +389,14 @@ module Jeckyl
   # compound objects
 
   # check the parameter is an array
+  #
+  # Jeckyl checking method to be used in parameter methods to check the validity of
+  # given parameters, returning the parameter if valid or else raising an exception
+  # which is either ConfigError if the parameter fails the check or ConfigSyntaxError if
+  # the parameter is not validly formed
+  #
+  # @param [Array] ary to check
+  #
   def an_array(ary)
     if ary.kind_of?(Array) then
       ary
@@ -346,6 +406,15 @@ module Jeckyl
   end
 
   # check the parameter is an array and the array is of the required type
+  #
+  # Jeckyl checking method to be used in parameter methods to check the validity of
+  # given parameters, returning the parameter if valid or else raising an exception
+  # which is either ConfigError if the parameter fails the check or ConfigSyntaxError if
+  # the parameter is not validly formed
+  #
+  # @param [Array] ary of values to check
+  # @param [Class] type being the class that the values must belong to
+  #
   def an_array_of(ary, type)
     raise_syntax_error("Provided a value that is a type: #{type.to_s}") unless type.class == Class
     if ary.kind_of?(Array) then
@@ -361,6 +430,14 @@ module Jeckyl
   end
 
   # check the parameter is a hash
+  #
+  # Jeckyl checking method to be used in parameter methods to check the validity of
+  # given parameters, returning the parameter if valid or else raising an exception
+  # which is either ConfigError if the parameter fails the check or ConfigSyntaxError if
+  # the parameter is not validly formed
+  #
+  # @param [Hash] hsh to check
+  #
   def a_hash(hsh)
     if hsh.kind_of?(Hash) then
       true
@@ -372,6 +449,14 @@ module Jeckyl
   # strings and text and stuff
 
   # check the parameter is a string
+  #
+  # Jeckyl checking method to be used in parameter methods to check the validity of
+  # given parameters, returning the parameter if valid or else raising an exception
+  # which is either ConfigError if the parameter fails the check or ConfigSyntaxError if
+  # the parameter is not validly formed
+  #
+  # @param [String] str to check
+  #
   def a_string(str)
     if str.kind_of?(String) then
       str
@@ -381,6 +466,15 @@ module Jeckyl
   end
 
   # check the parameter is a string and matches the required pattern
+  #
+  # Jeckyl checking method to be used in parameter methods to check the validity of
+  # given parameters, returning the parameter if valid or else raising an exception
+  # which is either ConfigError if the parameter fails the check or ConfigSyntaxError if
+  # the parameter is not validly formed
+  #
+  # @param [String] str to match against the pattern
+  # @param [Regexp] pattern to match with
+  #
   def a_matching_string(str, pattern)
     raise_syntax_error("Attempt to pattern match without a Regexp") unless pattern.kind_of?(Regexp)
     if pattern =~ a_string(str) then
@@ -391,6 +485,15 @@ module Jeckyl
   end
 
   # set membership - set is an array of members, usually symbols
+  #
+  # Jeckyl checking method to be used in parameter methods to check the validity of
+  # given parameters, returning the parameter if valid or else raising an exception
+  # which is either ConfigError if the parameter fails the check or ConfigSyntaxError if
+  # the parameter is not validly formed
+  #
+  # @param [Symbol] symb being the symbol to check
+  # @param [Array] set containing the valid symbols that symb should belong to
+  #
   def a_member_of(symb, set)
     raise_syntax_error("Sets to test membership must be arrays") unless set.kind_of?(Array)
     if set.include?(symb) then
@@ -404,24 +507,24 @@ module Jeckyl
   private
 
   # decides what to do with parameters that have not been defined.
-  # if @@strict then it will raise an exception. Otherwise it will create a key value pair
+  # unless @_relax then it will raise an exception. Otherwise it will create a key value pair
   #
   # This method also remembers the method name as the key to prevent the parsers etc from
   # having to carry this around just to do things like report on it.
   #
   def method_missing(symb, parameter)
 
-    @last_symbol = symb
+    @_last_symbol = symb
     #@parameter = parameter
     method_to_call = ("#{self.prefix}_" + symb.to_s).to_sym
     set_method = self.method(method_to_call)
 
-    self[@last_symbol] = set_method.call(parameter)
+    self[@_last_symbol] = set_method.call(parameter)
 
   rescue NameError
-    raise if @@debug
+    #raise if @@debug
     # no parser method defined.
-    if @@strict then
+    unless @_relax then
       # not tolerable
       raise UnknownParameter, format_error(symb, parameter, "Unknown parameter")
     else
@@ -433,37 +536,41 @@ module Jeckyl
 
   # get_defaults
   #
-  # calls each method with the name set_* with no parameters so that the defaults
+  # calls each method with the specified prefix with no parameters so that the defaults
   # defined for each will be passed back and used to set the hash before the
   # config file is evaluated.
   #
-  def get_defaults(ignore_errors)
+  def get_defaults(opts={})
+    flag_errors = opts[:flag_errors] 
+    local = opts[:local]
 
     # go through all of the methods
-    self.methods.each do |method_name|
+    self.class.instance_methods(!local).each do |method_name|
       if md = /^#{self.prefix}_/.match(method_name) then
 
-        # its a set_ method so call it
+        # its a prefixed method so call it
 
-        set_method = self.method(method_name.to_sym)
+        pref_method = self.method(method_name.to_sym)
         # get the corresponding symbol for the hash
-        @last_symbol = md.post_match.to_sym
-        @order << @last_symbol
-        # and call the method with no parameters
+        @_last_symbol = md.post_match.to_sym
+        @_order << @_last_symbol
+        # and call the method with no parameters, which will
+        # call the comment method and the default method where defined
+        # and thereby capture their values
         begin
-          a_value = set_method.call(1)
+          a_value = pref_method.call(1)
         rescue Exception
-          # ignore any errors
+          # ignore any errors, which are bound to result from passing in 1
         end
         begin
-          # now set the actual default from calling the method
-          # which may be different if the method transforms
+          # now set the actual default by calling the method again and passing
+          # the captured default, providing a result which may be different if the method transforms
           # the parameter!
-          param = @defaults[@last_symbol]
-          self[@last_symbol] = set_method.call(param) unless param.nil?
+          param = @_defaults[@_last_symbol]
+          self[@_last_symbol] = pref_method.call(param) unless param.nil?
         rescue Exception
-          raise unless ignore_errors
-          # ignore any errors
+          raise if flag_errors
+          # ignore any errors raised
         end
       end
     end
@@ -471,19 +578,42 @@ module Jeckyl
 
   # really private helpers that should not be needed unless the parser method
   # is custom
+  
+  protected
 
+  # helper method to format exception messages. A config error should be raised
+  # when the given parameter does not match the checks.
+  #
+  # The exception is raised in the caller's context to ensure backtraces are accurate.
+  #
+  # @param [Object] value - the object that caused the error
+  # @param [String] message to include in the exception
+  #
   def raise_config_error(value, message)
-    raise ConfigError, format_error(@last_symbol, value, message), caller
+    raise ConfigError, format_error(@_last_symbol, value, message), caller
   end
 
+  # helper method to format exception messages. A syntax error should be raised
+  # when the check method has been used incorrectly. See check methods for examples.
+  #
+  # The exception is raised in the caller's context to ensure backtraces are accurate.
+  #
+  # @param [String] message to include in the exception
+  #
   def raise_syntax_error(message)
     raise ConfigSyntaxError, message, caller
   end
 
+  # helper method to format an error
   def format_error(key, value, message)
     "[#{key}]: #{value} - #{message}"
   end
 
   end
+  
+  # define an alias for backwards compatitbility
+  # @deprecated Please use Jeckyl::Config
+  Options = Config
 
 end
+

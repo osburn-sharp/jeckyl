@@ -21,69 +21,91 @@ require 'thor'
 require 'thor/group'
 require 'colored'
 
-# Part of JeckylCLI - the command line interpreter for Jeckyl
-# a trivial module to share a method between thor groups
-module Support
-  # list the classes to select from
-  def display_classes(classes)
-    $stderr.puts "Select one of the following classes:"
-    classes.each do |klass|
-      $stderr.puts "  #{klass.name}"
-    end
-  end
-end
+
 
 # the Command Line Interface for jeckyl to allow users to generate
 # config files, generate a simple template or check a config file
 class JeckylCLI < Thor
   
-  # a Thor group of commands under "generate"
-  class Generator < Thor
+  default_task :usage
   
-    desc "config", "generate config file for the given config class"
-    def config(cfile, my_class_name=nil)
-      
-      require cfile # catch LoadError if cfile does not load
-      
-      my_class_index = 0 # assume there is only one
-      
-      classes = Jeckyl::Options.descendants
-      
-      if classes.length > 1 then
-        
-        unless my_class_name
-          # caller did not select a class
-          display_classes(classes)
-          return false
-          
-        else
-          my_class_index = nil # there is more than one
-          classes.each_index do |ind|
-            my_class_index = ind if classes[ind].name == my_class_name
-          end
-          unless my_class_index
-            # user did not select a valis class
-            $stderr.puts "Error: given class name is not valid: #{my_class_name}".red
-            display_classes(classes)
-            return false
-          end
-        end
-      end
-      
-      classes[my_class_index].generate_config
+  desc "usage", "You are looking at it"
+  def usage
+    puts "Useful tasks for managing Jeckyl config files."
+    puts ""
+    help
+  end
   
-    rescue LoadError
-      puts "Error: could not load #{cfile}".red
+  desc "list", "list all the config classes involved in a given class"
+  def list(cfile)
+    require cfile
+    classes = Jeckyl::Options.descendants
+    display_classes(classes)
+  rescue LoadError
+    puts "Error: could not load #{cfile}".red.bold
+  end
+    
+  
+  desc "config", "generate config file for the given config class"
+  method_option :class, :aliases=>'-C', :type=>:numeric, :desc=>'select class by index'
+  method_option :concat, :aliases=>'-k', :desc=>'concat all classes, starting with the oldest'
+  def config(cfile, my_class_name=nil)
+    
+    require cfile # catch LoadError if cfile does not load
+    
+    my_class_index = options[:class] || 0 
+    my_class_index += -1 if my_class_index > 0
+    
+    
+    classes = Jeckyl::Options.descendants
+    
+    if options[:concat].nil? && classes[my_class_index].nil? then
+      $stderr.puts "Index #{my_class_index + 1} is invalid. Please select a valid index".red.bold
+      display_classes(classes)
+      return false
     end
     
-    desc "klass", "generate a simple class template"
-    def klass(name, parent="Jeckyl::Options")
-      puts <<EOTXT
+    $stderr.puts "There are #{classes.length} sets of configs, use 'jeckyl list' to list them or -k to generate them all".yellow if classes.length > 1
+    
+    my_classes = []
+    if options[:concat] then
+      classes.each_index {|i| my_classes.unshift i}
+    else
+      my_classes << my_class_index
+    end
+    
+    my_classes.each do |ci|
+      puts "#"
+      puts "# Configuration Options for: #{classes[ci].name}"
+      puts "#"
+      puts
+      classes[ci].generate_config(true)
+    end
+    
+    unless options[:concat] || classes.length == 1
+      puts ""
+      puts "# There are also parameters in:"
+      classes.each do |klass|
+        puts "#  #{klass.name}"unless klass == classes[my_class_index]
+      end
+    end
+
+  rescue LoadError
+    puts "Error: could not load #{cfile}".red.bold
+  end
+  
+  desc "klass", "generate a simple class template"
+  def klass(name, parent="Jeckyl::Config")
+    puts <<EOTXT
 # Simple framework for defining Jeckyl options to put into a config hash
 
 module #{name}
   
-  class Options < #{parent}
+  # configuration parameters for #{name} 
+  #
+  # @see file:<PATH_TO_CONFIG_MARKDOWN_FILE> #{name} Parameter Descriptions
+  #
+  class Config < #{parent}
     
     def configure_a_parameter(val)
       default "default"
@@ -96,20 +118,11 @@ module #{name}
 end
 EOTXT
     
-    end
-    
-    no_tasks do
-      include Support
-    end
-    
-  end # Generator
+  end
+        
   
-  # make it a thor group - jeckyl generate config etc
-  register Generator, :generate, "generate", "generate things"
-  
-  
-  desc "check", "check the given config file is valid"
-  def check(klass_file, conf_file, klass_name=nil)
+  desc "check", "check the given config file is valid for the given class"
+  def check(klass_file, conf_file)
     
     require klass_file # catch LoadError if cfile does not load
     
@@ -117,26 +130,6 @@ EOTXT
     
     classes = Jeckyl::Options.descendants
     
-    if classes.length > 1 then
-      
-      unless klass_name
-        # caller did not select a class
-        display_classes(classes)
-        return false
-        
-      else
-        my_class_index = nil # there is more than one
-        classes.each_index do |ind|
-          my_class_index = ind if classes[ind].name == klass_name
-        end
-        unless my_class_index
-          # user did not select a valis class
-          $stderr.puts "Error: given class name is not valid: #{my_class_name}".red
-          display_classes(classes)
-          return false
-        end
-      end
-    end
     
     classes[my_class_index].check_config(conf_file)
 
@@ -145,69 +138,85 @@ EOTXT
     
   end
   
-  desc "comments", "display the comments from a class as a class header"
-  def comments(klass_file, klass_name=nil)
+  desc "markdown", "display the comments from a class in markdown format"
+  method_option :class, :aliases=>'-C', :type=>:numeric, :desc=>'select class by index'
+  method_option :concat, :aliases=>'-k', :desc=>'concat all classes, starting with the oldest'
+  def markdown(cfile)
     
-    require klass_file # catch LoadError if cfile does not load
+    require cfile # catch LoadError if cfile does not load
     
-    my_class_index = 0 # assume there is only one
+    my_class_index = options[:class] || 0 
+    my_class_index += -1 if my_class_index > 0
+    
     
     classes = Jeckyl::Options.descendants
     
-    if classes.length > 1 then
+    if options[:concat].nil? && classes[my_class_index].nil? then
+      $stderr.puts "Index #{my_class_index + 1} is invalid. Please select a valid index".red.bold
+      display_classes(classes)
+      return false
+    end
+    
+    $stderr.puts "There are #{classes.length} sets of configs, use 'jeckyl list' to list them or -k to generate them all".yellow if classes.length > 1
+    
+    my_classes = []
+    if options[:concat] then
+      classes.each_index {|i| my_classes << i}
+    else
+      my_classes << my_class_index
+    end
+    
+    first = true
+    sublevel = 2
+    
+    my_classes.each do |ci|
+      my_class = classes[ci]
+      my_configurator = my_class.new(nil, :local=>true)
       
-      unless klass_name
-        # caller did not select a class
-        display_classes(classes)
-        return false
-        
+      if first then
+        puts "# #{my_class.name} Parameters"
+        puts ""
+        puts "The following parameters are defined in {#{my_class.name}} and should be used"
+        puts "in a configuration file. A default config file can be generated using:"
+        puts ""
+        puts "    jeckyl config #{File.expand_path(cfile)}"
       else
-        my_class_index = nil # there is more than one
-        classes.each_index do |ind|
-          my_class_index = ind if classes[ind].name == klass_name
+        puts "## Additional Parameters from #{my_class.name}"
+        puts ""
+        puts "The following additional parameters are defined in #{my_class.name}, which"
+        puts "is an ancestor of this config class. See separate documentation for more details."
+        sublevel = 3
+      end
+      first = false
+      puts ""
+      
+      puts "#" * sublevel + " Parameters"
+      puts ""
+      
+      my_configurator.comments.each do |param, comment|
+        puts " * **#{param}**"
+        puts " "
+        comment.each {|line| puts "    #{line}"}
+        puts ""
+        if my_configurator.defaults.has_key?(param) then
+          puts "    Default: #{my_configurator.defaults[param].inspect}"
+        else
+          puts "    No default set"
         end
-        unless my_class_index
-          # user did not select a valis class
-          $stderr.puts "Error: given class name is not valid: #{my_class_name}".red
-          display_classes(classes)
-          return false
-        end
+        puts ""
       end
     end
     
-    my_configurator = classes[my_class_index].new
-    names = classes[my_class_index].to_s.split('::')
-    
-    puts "# #{names[0]} Parameters"
-    
-    puts "The following parameters are defined in #{names.join('::')} and should be used"
-    puts "in a configuration file. This file can be generated using:"
-    puts ""
-    puts "    jeckyl config #{File.expand_path(klass_file)}"
-    puts ""
-    if classes.length > 1 then
+    unless options[:concat] || classes.length == 1
       puts ""
-      puts "**Warning**: there is more than one config class to choose from. The above"
-      puts "command will prompt you to add a classname. To generate a config file for this class"
-      puts "type:"
+      puts "## See Also"
       puts ""
-      puts "    jeckyl config #{File.expand_path(klass_file)} #{names.join('::')}"
+      puts "There are also parameters in:"
       puts ""
+      classes.each do |klass|
+        puts " * #{klass.name}"unless klass == classes[my_class_index]
+      end
     end
-    
-    puts "## Parameters"
-    puts ""
-    
-    my_configurator.comments.each do |param, comment|
-      puts " * **#{param}**"
-      puts " "
-      comment.each {|line| puts "    #{line}"}
-      puts ""
-    end
-    # puts "  class #{names[1]} < #{classes[my_class_index].superclass}"
-    # puts ""
-    # puts "  end"
-    # puts "end"
 
   rescue LoadError
     puts "Error: could not load #{cfile}".red
@@ -215,7 +224,14 @@ EOTXT
   end
   
   no_tasks do
-    include Support
+  def display_classes(classes)
+    $stderr.puts "The following classes are available:".green
+    count = 1
+    classes.each do |klass|
+      $stderr.puts   "  #{count}. #{klass.name}"
+      count += 1
+    end
+  end
   end
 
 end

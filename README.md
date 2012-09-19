@@ -2,10 +2,13 @@
 
 ## Jumpin' Ermin's Configurator for Kwick and easY Linux services
 
-Jeckyl can be used to create an options hash from a simple config file. All you need to do is define 
-permitted options, their defaults, checking rules and even comments in one simple class. This
-is then used to parse the config file and create the options hash. Jeckyl comes complete with a utility
-to check a config file against a given class and to generate a default file for you to tailor.
+Jeckyl can be used to create a parameters hash from a simple config file, having run whatever checks you want
+on the file to ensure the values passed in are valid. All you need to do is define 
+permitted parameters, their defaults, checking rules and even comments for each parameter in a parameter method, 
+all in one simple class. This is then used to parse the config file and create the parameters hash. Jeckyl 
+comes complete with a utility to check a config file against a given class and to generate a default file for you to tailor.
+
+Jeckyl was inspired by the configuration file methods in [Unicorn](http://unicorn.bogomips.org/)
 
 ## Installation
 
@@ -15,12 +18,12 @@ Jeckyl comes as a gem and can be installed in the usual way:
     
 ## Getting Started
 
-Jeckyl provides the {Jeckyl::Options} class to which a user has to add their own parameter methods. Think of
-the name of a parameter and prefix this with `configure_`:
+To use Jeckyl, create a new parameter class and add a parameter method for each parameter you want to define in
+your config files. Think of the name of a parameter and prefix this with `configure_`:
 
     require 'jeckyl'
     
-    class MyConfig < Jeckyl#Options
+    class MyConfig < Jeckyl::Config
     
       def configure_my_greeting(greet)
         default "Hello"
@@ -30,13 +33,15 @@ the name of a parameter and prefix this with `configure_`:
       end
     end
     
-The method first sets a default value to be used if no value is given at all in the config file. This is
-optional. It then describes the parameter, which is used by `jeckyl` when generating a blank config. Finally
-it runs a check on the given parameter to ensure it is a string.
+The parameter method first sets a default value to be used if no value is given at all in the config file. This is
+optional. It then describes the parameter, which is used by `jeckyl` when generating a blank config or a markdown file. Finally
+it runs a check on the given parameter to ensure it is a string. Note the name of the method that you use in the
+config file itself would be just 'my_greeting' wheras the parameter method is 'configure_my_greeting'.
 
-Jeckyl comes complete with a whole range of checking methods that can be used for defining parameters. These
-methods are handy because they handle errors transparently. It is not necessary, however, to use them so long as
-the value returned by the parameter method is what you want in your config hash.
+Jeckyl comes complete with a whole range of checking methods that can be used for defining parameters 
+(see {Jeckyl::Config} for details). These methods are handy because they handle errors transparently. 
+It is not necessary, however, to use them so long as the value returned by the parameter method is what 
+you want in your config hash.
 
 To use this simple example, you can generate a config file with jeckyl:
 
@@ -58,9 +63,13 @@ And then, to use this config file to create the options hash:
     
     options = MyConfig.new('test/conf.d/test.rb')
     
-    options.inspect => {:config_file=>'test/conf.d/test.rb', :my_greeting=>'Welcome'}
+    options.inspect => {:config_files=>['test/conf.d/test.rb'], :my_greeting=>'Welcome'}
     
-Some examples of different parameters are given here, taken from the Jelly::Options class, Jelly being
+## Using Jeckyl
+
+### Example Parameter Methods
+
+Some examples of different parameters are given here, taken from the Jelly::Config class, Jelly being
 a jazzed-up ruby logger:
 
     def configure_log_level(lvl)
@@ -89,7 +98,7 @@ them one per line. It also shows how to test that a key value is used that belon
 
     end
 
-This shows how multiple tests can be anded together.
+This shows how multiple tests can be and'd together.
 
     def configure_log_length(int)
       default 1 #Mbyte
@@ -157,59 +166,133 @@ be called multiple times:
 The method uses its own instance variables to keep track of things over multiple calls and
 returns the @sensors array so that the actual parameter returned from Jeckyl will be the last value
 returned. It uses a mixture of jeckyl tests and explicit tests to ensure the parameters are correct.
-If preferred, you can add custom helper methods to your options class in the same manner as {Jeckyl::Options}.
+If preferred, you can add custom helper methods to your parameter class in the same manner as {Jeckyl::Config}.
+
+### Writing Ruby
 
 Because the config file is ruby, it can contain any valid ruby code to help construct your parameters,
 which can be instances of complex classes if required. BUT this also means the code can do things you
 might not have intended so some care is needed here!
 
-If you are lazy and cannot be bothered with defining lots of methods, you can relax the parsing
-and even use Jeckyl as-is. To relax, call the class method, {Jeckyl::Options.relax}. Then any parameter value pairs in
-the config file will be converted to key-value pairs in the hash without any checks at all. You obviously cannot do
-much with this approach but in simple cases it may be OK? If, so some strange reason, you want to turn checking back on
-then {Jeckyl::Options.strict} will do the trick
+One of the things you can add, if it helps, is your own checking method. Call it what you like, pass in the object
+to check (and whatever else you need) and either return the item or raise an error if the checks fail. There
+are two methods available: {Jeckyl::Config#raise_config_error} e.g. for defining a value
+outside the required range and {Jeckyl::Config#raise_syntax_error} e.g. for defining a string where a number is required.
+
+### Can't be bothered? a more relaxed approach
+
+If you are lazy and cannot be bothered with defining lots of methods, you can relax the parsing and checking and convert a
+parameter file straight into an options hash. To relax checking, set the :relax option to true when creating the parameters hash. 
+Then any parameter value pairs in the config file will be converted to key-value pairs in the hash 
+without any checks at all. You obviously cannot do much with this approach but in simple cases it may be OK? 
 
 If you don't like having to prefix your parameter methods with 'configure_' you can set another prefix
-by redefining the prefix method to return something else:
+by redefining the prefix method in your subclass to return something else:
 
     def prefix
-      'set'
+      'set' # could also be 'cf' if you find typing a bore
     end
 
-Jeckyl now includes a couple of methods to help sub-divide config hashes. To extract 
-all of the options from a hash that belong to a given Jeckyl class, use Class.intersection(hash) (see 
-{Jeckyl::Options.intersection}). And to remove all of the options from one config hash in another, 
-use conf.complement(hash) ({Jeckyl::Options#complement}).
+### Managing Parameter Hashes
 
-For example, the Jelly logger defines a set of logging parameters in Jelly::Options. These may be inherited
+You can easily merge parameter files using the {Jeckyl::Config#merge} method:
+
+    config = MyConfig.new('/etc/system.rb')
+    config.merge(File.join(ENV[USER], '.my_config_.rb'))
+    config.merge('./.local_config_.rb')
+
+Jeckyl includes a couple of methods to help sub-divide parameter hashes. To extract 
+all of the parameters from a hash that belong to a given Jeckyl class, use Class.intersection(hash) (see 
+{Jeckyl::Config.intersection}). And to remove all of the parameters from one config hash in another, 
+use conf.complement(hash) ({Jeckyl::Config#complement}).
+
+For example, the Jelly logger defines a set of logging parameters in Jelly::Config. These may be inherited
 by another service that adds its own parameters (such as Jerbil):
 
-    options = Jerbil::Options.new(my_conf)
+    options = Jerbil::Config.new(my_conf)
     
-    log_opts = Jelly::Options.intersection(options)
+    log_opts = Jelly::Config.intersection(options)
     
     jerb_opts = options.complement(log_opts)
     
-Finally, note that Jeckyl::Options is itself a subclass of Hash, and therefore Jeckyl config objects inherit
+### Some Internal Methods
+
+
+### Jeckyl::Config < Hash
+
+Finally, note that Jeckyl::Config is itself a subclass of Hash, and therefore Jeckyl config objects inherit
 all hash methods as well!
+
+## The 'jeckyl' Command
+
+Jeckyl comes with a simple script: bin/jeckyl to help in creating, checking and documenting parameters.
+
+You can create a simple config class to start you off with:
+
+    $ jeckyl klass <name>
+      
+which will output a small template to stdout. By default this will inherit from {Jeckyl::Config} but
+you can add another parent with, for example:
+
+    $ jeckyl klass MyService JerbilService::Config
     
+Save the file and edit it to add your parameters as required. Once you have defined the config class, 
+you can generate a default config file for your application using:
+
+    $ jeckyl config path/to/config_class.rb
+
+This will generate a config file on stdout for each of the parameters, with the comment defined in the
+parameter method and the default value where defined. Defaults will be commented out. You can save this file and edit it
+to create a new config file.
+
+Where you have created a config class that inherits from another config class, you will probably want to create
+a config file with all of the parameters in it. By default only the config class defined in the given file
+will be generated. To generate all parameters add the -k (for concat) option:
+
+    $ jeckyl config path/to/config_class.rb -k
+    
+The resulting config file will be neatly divided into sections, one for each class, starting with the most
+ancestral. If you want to know what config classes you have inherited, then try:
+
+    $ jeckyl list path/to/config_class.rb
+    
+This will output an indexed list of the classes available. If you wanted to generate a config file just for one class, 
+select it with the -C option and the index from the list:
+
+    $ jeckyl config path/to/config_class.rb -C 2
+    
+Once you have editted your config file you can check if it is OK:
+
+    $ jeckyl check path/to/config_class.rb path/to/config_file.rb
+    
+This will either display error messages or tell you that the config file is OK.
+
+Having created a config class, you may want to document it. Given that each parameter is already described within
+the parameter method, it would be inconvenient to have to copy these comments into ruby comments just to
+help the various documentation tools around. Instead, you can generate a markdown file from the parameter methods
+and then include this in your documentation:
+
+    $ jeckyl markdown path/to/config_class.rb
+    
+This task takes the same options as the config task. You can then include a reference or link to this file
+in the header comment for your config class. The template generated above already has a yard @see directive.
+
+    # @see file:lib/project/config_comments.md
+
     
 ## Code Walkthrough
 
-Jeckyl consists of a single class: {Jeckyl::Options}. When you create an instance of a subclass the following
-happens (see {Jeckyl::Options#initialize}):
+Jeckyl consists of a single class: {Jeckyl::Config}. When you create an instance of a subclass the following
+happens (see {Jeckyl::Config#initialize}):
 
-+ all of the parameter methods are called by {Jeckyl::Options#get_defaults} to obtain their default values 
-  (the {Jeckyl::Options#default default} method sets this in a hash)
++ all of the parameter methods are called by {Jeckyl::Config#get_defaults} to obtain their default values 
+  (the {Jeckyl::Config#default default} method sets this in a hash)
   and are called again with these default values to process them through whatever the parameter method defines. This
-  ensures, for example, that if the default is multiplied by 10, the resulting value is also.
+  ensures, for example, that if the parameter is multiplied by 10 before being added to the config hash, 
+  the default value is also multipled by 10.
   
 + if no config file is provided, the default values are returned as the options hash. This is used, for example,
-  by the config {Jeckyl::Options.generate_config generator}.
-  
-+ otherwise, the optional options hash that can be passed in to the new method is merged with the defaults, 
-  allowing the caller to provide some local overrides to the defaults, or even add parameters that have not 
-  been defined anywhere else!
+  by the config {Jeckyl::Config.generate_config generator}.
   
 + finally, the given config file (whose name is added to the hash) is evaluated so that the resulting parameters are
   added, overriding any defaults or manually entered values.
@@ -217,7 +300,17 @@ happens (see {Jeckyl::Options#initialize}):
 All of this is done with just a little bit of meta-magic. When the config file is eval'ed the parameter names are eval'ed
 in the context of the instance being created, but because the parameter methods are all prefixed with something (configure by default)
 method_missing is called instead. This orchestrates the setting of parameters and collecting of results into the options
-hash, passing the parameter values to the corresponding parameter method. Simples, really.
+hash, passing the parameter values to the corresponding parameter method. 
+
+For example, a config file might contain:
+
+    # define a greeting for the application
+    greeting "Hello"
+    
+There is no greeting method, so method_missing is called instead. This remembers the name of the "missing" method (:greeting),
+calls configure_greeting and stores the results in the instances hash. The main reason for doing this (as opposed to just
+calling the method 'greeting') is to enable the evaluation of defaults and comments in the context of each parameter method. 
+All of this is private and therefore under the bonnet.
 
 ## Dependencies
 
@@ -225,48 +318,11 @@ See the {file:Gemfile} for details of dependencies.
 
 Tested on Ruby 1.8.7.
 
-## Testing 
+## Testing Jeckyl
 
-There is an rspec test file to test the whole thing. It uses the test subclass in "../test" and various config files
-in "../conf.d". There is another rspec file that tests the config_check function.
+There is an rspec test file to test the whole thing (spec/jeckyl_spec.rb). It uses the test subclass in "../test" and 
+various config files in "../conf.d". There is another rspec file that tests the config_check function.
   
-## Utilities
-
-Jeckyl comes with a simple script: bin/jeckyl. This offers the following:
-
-   $ jeckyl generate config a_class
-
-This will output to stdout a config file based on the jeckyl class a_class. This
-can either be a ruby file path or the name of a library that is accessible through
-rubygems. Note where a class is itself a subclass of another config class then the
-command above will display all of the classes. A specific class can be selected by entering
-its name:
-
-    $ jeckyl generate config subclass Sclass
-
-A simple template can be generated as follows:
-
-    $ jeckyl generate klass <name> [parent]
-
-This will create a very simple template for a module <name> and a class Options that 
-will be a descendant of parent or Jeckyl::Options if not parent is specified.
-
-There is also a command that generates a markdown file containing all of the comments, so that you can
-easily include them in your yard docs. Run the command:
-
-    $ jeckyl comment path/to/config_class [class_name] >lib/project/config_comments.md
-    
-It seems to be difficult to get this markdown into the yard docs, but one way is to add it
-as a @see tag:
-
-    # @see file:lib/project/config_comments.md
-
-Finally:
-
-    $ jeckyl check <class> <conf> [class_name]
-
-will run a check on the <conf> file against the <class> file. As before, if there are more
-than one class in the hierarchy, select the right one with [class_name].
 
 ## Why did I bother?
 
@@ -277,11 +333,6 @@ Unicorn (the backend web machine I now use for Rails apps). I liked the concept 
 thought it could be made more general, which resulted in Jeckyl.
 
 ## Bugs etc
-
-One annoying feature is that generated config files do not put the parameters in the same order
-as they are defined. This means that related parameters are scattered across the config file. There
-is no natural solution to this without parsing the class file as a text file to work out the order.
-Need to consider this at some point?
 
 Details of bugs can be found in {file:Bugs.rdoc}
 

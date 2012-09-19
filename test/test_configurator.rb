@@ -11,7 +11,7 @@
 # must themselves be licensed under the Open Software Licence v. 3.0
 # 
 #
-require 'jeckyl'
+#require 'jeckyl'
 
 class TestJeckyl < Jeckyl::Options
 

@@ -4,6 +4,10 @@
 
 == History
 
+[jeckyl-0.2.0 19-Sep-2012]
+
+  Clean up code and documentation and enable parameter methods to be separated by class.
+
 [jeckyl-0.1.11 23-Jul-2012]
 
   Added comment command to jeckyl to produce just comments for yard

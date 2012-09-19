@@ -14,7 +14,7 @@ describe "Jeckyl" do
   it "should return the defaults" do
     conf = TestJeckyl.new(File.join(conf_path, 'defaults.rb'))
     conf[:log_dir].should == '/tmp'
-    conf[:key_file].should be_nil
+    #conf[:key_file].should be_nil
     conf[:log_level].should == :verbose
     conf[:log_rotation].should == 5
     conf[:threshold].should == 5.0
@@ -29,20 +29,10 @@ describe "Jeckyl" do
     conf[:log_rotation].should == 5
     conf[:email].should == "robert@osburn-sharp.ath.cx"
     conf.has_key?(:sieve).should be_true
+    conf[:config_files].length.should == 1
   end
 
-  it "should be easy to set simple defaults" do
-    conf_file = conf_path + '/a_few_params'
-    defaults = {:master_key => 'ABCDEF', :sieve=>[3,4,5]}
-    conf = TestJeckyl.new(conf_file, defaults)
-    conf[:master_key].should == 'ABCDEF'
-    conf[:log_level].should == :debug
-    conf[:log_dir].should == '/tmp'
-    conf[:key_file].should be_nil
-    conf[:pi].should == 3.14
-    conf[:sieve].should == [3,4,5]
-    conf[:log_rotation].should == 5
-  end
+
 
   # general exceptions
 
@@ -173,8 +163,7 @@ describe "Jeckyl" do
     # leave at the end or you need to re-strict Jeckyl.
     it "should load any parameter if its not being strict" do
       conf_file = conf_path + '/sloppy_params'
-      TestJeckyl.relax
-      conf = TestJeckyl.new(conf_file)
+      conf = TestJeckyl.new(conf_file, :relax=>true)
       conf[:my_age].should == 50
     end
 
@@ -191,8 +180,22 @@ describe "Jeckyl" do
       subopts.has_key?(:no_def).should be_true
       opts.complement(subopts)
       opts.length.should == 2
-      opts.has_key?(:config_file).should be_true
+      opts.has_key?(:config_files).should be_true
       opts.has_key?(:another).should be_true
+    end
+  end
+  
+  describe "Merging config files" do
+    it "should merge another config file" do
+      conf_file = conf_path + '/jeckyl'
+      conf = TestJeckyl.new(conf_file)
+      conf.merge File.join(conf_path, 'merger.rb')      
+      conf[:log_dir].should match(/reports$/)
+      conf[:log_level].should == :debug
+      conf[:log_rotation].should == 6
+      conf[:email].should == "robert@osburn-associates.ath.cx"
+      conf[:config_files].length.should == 2
+      conf[:pi].should == 3.14592
     end
   end
 
