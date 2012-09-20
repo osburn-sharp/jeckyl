@@ -2,19 +2,21 @@
 
 ## Jumpin' Ermin's Configurator for Kwick and easY Linux services
 
-Jeckyl can be used to create a parameters hash from a simple config file, having run whatever checks you want
-on the file to ensure the values passed in are valid. All you need to do is define 
-permitted parameters, their defaults, checking rules and even comments for each parameter in a parameter method, 
-all in one simple class. This is then used to parse the config file and create the parameters hash. Jeckyl 
+Jeckyl can be used to create a parameters hash from a simple config file written in Ruby, having run whatever checks you want
+on the file to ensure the values passed in are valid. All you need to do is define a class inheriting from Jeckyl, methods for
+each parameter, its default, whatever checking rules are appropriate and even a comment for generating templates etc.
+This is then used to parse a Ruby config file and create the parameters hash. Jeckyl 
 comes complete with a utility to check a config file against a given class and to generate a default file for you to tailor.
 
-Jeckyl was inspired by the configuration file methods in [Unicorn](http://unicorn.bogomips.org/)
+Jeckyl was inspired by the configuration file methods in [Unicorn](http://unicorn.bogomips.org/).
 
 ## Installation
 
-Jeckyl comes as a gem and can be installed in the usual way:
+Jeckyl comes as a gem. It can be installed in the usual way:
 
     gem install jeckyl
+    
+That is all you need to do.
     
 ## Getting Started
 
@@ -281,6 +283,8 @@ in the header comment for your config class. The template generated above alread
 
     
 ## Code Walkthrough
+
+Jeckyl is documented on [RubyDoc.info](http://rdoc.info/github/osburn-sharp/jeckyl).
 
 Jeckyl consists of a single class: {Jeckyl::Config}. When you create an instance of a subclass the following
 happens (see {Jeckyl::Config#initialize}):

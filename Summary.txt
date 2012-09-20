@@ -1,1 +1,1 @@
-Conifguration options for ruby apps
+Create and manage configuration files in Ruby for Ruby.
