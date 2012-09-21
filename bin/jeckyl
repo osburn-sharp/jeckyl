@@ -31,9 +31,14 @@ class JeckylCLI < Thor
   
   desc "usage", "You are looking at it"
   def usage
-    puts "Useful tasks for managing Jeckyl config files. See README.md for more information."
+    puts "Useful tasks for managing Jeckyl config files."
     puts ""
     help
+    puts ""
+    puts "See Also:"
+    puts "  README.md: (see jeckyl readme above)"
+    puts "  GitHub: https://github.com/osburn-sharp/jeckyl"
+    puts "  RubyDoc: http://rdoc.info/github/osburn-sharp/jeckyl/frames"
   end
   
   desc "readme", "display the readme file for the gem"

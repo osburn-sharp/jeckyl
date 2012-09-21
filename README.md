@@ -284,7 +284,7 @@ in the header comment for your config class. The template generated above alread
     
 ## Code Walkthrough
 
-Jeckyl is documented on [RubyDoc.info](http://rdoc.info/github/osburn-sharp/jeckyl).
+Jeckyl is documented on [RubyDoc.info](http://rdoc.info/github/osburn-sharp/jeckyl/frames).
 
 Jeckyl consists of a single class: {Jeckyl::Config}. When you create an instance of a subclass the following
 happens (see {Jeckyl::Config#initialize}):

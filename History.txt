@@ -4,6 +4,10 @@
 
 == History
 
+[jeckyl-0.2.3 21-Sep-2012]
+
+  Add references to online docs etc to usage.
+
 [jeckyl-0.2.2 21-Sep-2012]
 
   Add readme command to jeckyl to display README.md (when included properly)
