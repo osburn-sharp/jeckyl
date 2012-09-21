@@ -31,9 +31,22 @@ class JeckylCLI < Thor
   
   desc "usage", "You are looking at it"
   def usage
-    puts "Useful tasks for managing Jeckyl config files."
+    puts "Useful tasks for managing Jeckyl config files. See README.md for more information."
     puts ""
     help
+  end
+  
+  desc "readme", "display the readme file for the gem"
+  def readme
+    gem_spec = Gem::Specification.find_by_name('jeckyl')
+    readme_path = File.join(gem_spec.gem_dir, 'README.md')
+    
+    File.open(readme_path) do |rfile|
+      rfile.each_line do |rline|
+        puts rline
+      end
+    end
+
   end
   
   desc "list", "list all the config classes involved in a given class"

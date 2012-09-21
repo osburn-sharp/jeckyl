@@ -1,6 +1,6 @@
 #JECKYL 
 
-## Jumpin' Ermin's Configurator for Kwick and easY Linux services
+### (a.k.a. Jumpin' Ermin's Configurator for Kwick and easY Linux services)
 
 Jeckyl can be used to create a parameters hash from a simple config file written in Ruby, having run whatever checks you want
 on the file to ensure the values passed in are valid. All you need to do is define a class inheriting from Jeckyl, methods for
