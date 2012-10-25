@@ -8,6 +8,12 @@ each parameter, its default, whatever checking rules are appropriate and even a 
 This is then used to parse a Ruby config file and create the parameters hash. Jeckyl 
 comes complete with a utility to check a config file against a given class and to generate a default file for you to tailor.
 
+**GitHub:** [https://github.com/osburn-sharp/jeckyl](https://github.com/osburn-sharp/jeckyl)
+
+**RubyDoc:** [http://rubydoc.info/github/osburn-sharp/jeckyl/frames](http://rubydoc.info/github/osburn-sharp/jeckyl/frames)
+
+**RubyGems:** [https://rubygems.org/gems/jeckyl](https://rubygems.org/gems/jeckyl)
+
 Jeckyl was inspired by the configuration file methods in [Unicorn](http://unicorn.bogomips.org/).
 
 ## Installation

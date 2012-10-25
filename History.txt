@@ -4,11 +4,15 @@
 
 == History
 
+[jeckyl-0.2.5 25-Oct-2012]
+
+  Clean up unwanted git files and update README links (e.g. rubydoc)
+
 [jeckyl-0.2.4 25-Oct-2012]
 
   Deprecate ConfigRoot constant in favour of Jeckyl.config_dir, which will pick up
   the environment variable JECKYL_CONFIG_DIR if set or use '/etc/jeckyl'. This is a
-  change from the old, quirky default of '/etc/jermine'.
+  change from the old, quirky default of '/etc/jermine'. Tweak to 'jeckyl markdown'.
 
 [jeckyl-0.2.3 21-Sep-2012]
 
