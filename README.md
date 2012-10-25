@@ -1,6 +1,6 @@
 #JECKYL 
 
-### (a.k.a. Jumpin' Ermin's Configurator for Kwick and easY Linux services)
+(a.k.a. Jumpin' Ermin's Configurator for Kwick and easY Linux services)
 
 Jeckyl can be used to create a parameters hash from a simple config file written in Ruby, having run whatever checks you want
 on the file to ensure the values passed in are valid. All you need to do is define a class inheriting from Jeckyl, methods for
@@ -16,7 +16,11 @@ Jeckyl comes as a gem. It can be installed in the usual way:
 
     gem install jeckyl
     
-That is all you need to do.
+That is all you need to do. Type 'jeckyl' to see usage and references to documentation.
+
+Jeckyl can be used to set the default location for the config files it processes. This will
+be '/etc/jeckyl' unless you set the environment varibale 'JECKYL_CONFIG_DIR' to something else.
+This could be done on a system-wide basis by include a file with this variable in /etc/env.d.
     
 ## Getting Started
 
@@ -71,12 +75,12 @@ And then, to use this config file to create the options hash:
 
 ### Example Parameter Methods
 
-Some examples of different parameters are given here, taken from the Jelly::Config class, Jelly being
-a jazzed-up ruby logger:
+Some examples of different parameters are given here, taken from the Jellog::Config class, [Jellog](https://github.com/osburn-sharp/jellog)
+being a jazzed-up ruby logger:
 
     def configure_log_level(lvl)
       default :system
-      comment "Controls the amount of logging done by Jelly",
+      comment "Controls the amount of logging done by Jellog",
         "",
         " * :system - standard message, plus log to syslog",
         " * :verbose - more generous logging to help resolve problems",
@@ -208,12 +212,12 @@ all of the parameters from a hash that belong to a given Jeckyl class, use Class
 {Jeckyl::Config.intersection}). And to remove all of the parameters from one config hash in another, 
 use conf.complement(hash) ({Jeckyl::Config#complement}).
 
-For example, the Jelly logger defines a set of logging parameters in Jelly::Config. These may be inherited
+For example, the Jellog logger defines a set of logging parameters in Jellog::Config. These may be inherited
 by another service that adds its own parameters (such as Jerbil):
 
     options = Jerbil::Config.new(my_conf)
     
-    log_opts = Jelly::Config.intersection(options)
+    log_opts = Jellog::Config.intersection(options)
     
     jerb_opts = options.complement(log_opts)
     

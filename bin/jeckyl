@@ -197,7 +197,7 @@ EOTXT
         puts "The following parameters are defined in {#{my_class.name}} and should be used"
         puts "in a configuration file. A default config file can be generated using:"
         puts ""
-        puts "    jeckyl config #{File.expand_path(cfile)}"
+        puts "    jeckyl config #{cfile}"
       else
         puts "## Additional Parameters from #{my_class.name}"
         puts ""

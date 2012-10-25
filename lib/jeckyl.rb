@@ -20,7 +20,15 @@ require 'jeckyl/errors'
 module Jeckyl
 
   #default location for all config files
-  ConfigRoot = '/etc/jermine'
+  # @deprecated Use {Jeckyl.config_dir} instead
+  ConfigRoot = '/etc/jeckyl'
+  
+  # the default system location for jeckyl config file
+  # 
+  # This location can be set with the environment variable JECKYL_CONFIG_DIR
+  def Jeckyl.config_dir
+    ENV['JECKYL_CONFIG_DIR'] || '/etc/jeckyl'
+  end
 
   # This is the main Jeckyl class from which to create specific application
   # classes. For example, to create a new set of parameters, define a class as
@@ -178,7 +186,7 @@ module Jeckyl
   #  and it can be an instance of Jeckyl::Config or a hash 
   # @return [Hash] containing all of the intersecting parameters
   #
-  # Note this returns a plain hash and not an instance of Jeckyl::Config
+  # @note this returns a plain hash and not an instance of Jeckyl::Config
   #
   def self.intersection(full_config)
     me = self.new # create the defaults for this class
@@ -236,7 +244,7 @@ module Jeckyl
     
     self[:config_files] << conf_file
     
-    # and finally get the values from the config file itself
+    # get the values from the config file itself
     self.instance_eval(File.read(conf_file), conf_file)
 
   rescue SyntaxError => err
