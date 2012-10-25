@@ -4,6 +4,10 @@
 
 == History
 
+[jeckyl-0.2.6 25-Oct-2012]
+
+  Revert to /etc/jermine while working through changes to over gems
+
 [jeckyl-0.2.5 25-Oct-2012]
 
   Clean up unwanted git files and update README links (e.g. rubydoc)

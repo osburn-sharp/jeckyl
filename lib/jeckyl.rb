@@ -21,13 +21,13 @@ module Jeckyl
 
   #default location for all config files
   # @deprecated Use {Jeckyl.config_dir} instead
-  ConfigRoot = '/etc/jeckyl'
+  ConfigRoot = '/etc/jermine'
   
   # the default system location for jeckyl config file
   # 
   # This location can be set with the environment variable JECKYL_CONFIG_DIR
   def Jeckyl.config_dir
-    ENV['JECKYL_CONFIG_DIR'] || '/etc/jeckyl'
+    ENV['JECKYL_CONFIG_DIR'] || '/etc/jermine'
   end
 
   # This is the main Jeckyl class from which to create specific application
