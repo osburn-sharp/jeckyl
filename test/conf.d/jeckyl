@@ -2,8 +2,10 @@
 # Jeckyl test file
 #
 
+root = File.expand_path('../..', File.dirname(__FILE__))
+
 # should be a writable directory
-log_dir "./test"
+log_dir File.join(root, "test")
 
 #should be a valid symbol
 log_level :verbose
@@ -25,7 +27,7 @@ sieve [2, 5, 7, 10, 15]
 
 # hash of anything
 my_opts = {:peter=>37, :paul=>40, :birds=>true}
-options my_opts
+option_set my_opts
 
 # string formatted as email address
 email "robert@osburn-sharp.ath.cx"
@@ -44,3 +46,10 @@ flag "no"
 flag 1
 flag 0
 
+
+# new things
+offset 134
+
+start_day 6
+
+log_level :debug

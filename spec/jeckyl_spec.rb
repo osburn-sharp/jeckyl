@@ -30,6 +30,9 @@ describe "Jeckyl" do
     conf[:email].should == "robert@osburn-sharp.ath.cx"
     conf.has_key?(:sieve).should be_true
     conf[:config_files].length.should == 1
+    conf[:option_set][:peter].should == 37
+    conf[:offset].should == 134
+    conf[:start_day].should == 6
   end
 
 
@@ -89,6 +92,11 @@ describe "Jeckyl" do
       lambda{conf = TestJeckyl.new(conf_file)}.should raise_error(Jeckyl::ConfigError, /^\[pi\]:.*value is not of required type: Float$/)
     end
 
+    it "should raise an exception if it gets a negative instead of a positive" do
+      conf_file = conf_path + '/not_positive.rb'
+      lambda{conf = TestJeckyl.new(conf_file)}.should raise_error(Jeckyl::ConfigError, /^\[offset\]:.*value is not a positive number: \-\d+$/)
+    end
+
   end
 
   describe "Boolean Parameters" do
@@ -114,7 +122,7 @@ describe "Jeckyl" do
 
     it "should raise an exception if it gets a string instead of a hash" do
       conf_file = conf_path + '/not_a_hash'
-      lambda{conf = TestJeckyl.new(conf_file)}.should raise_error(Jeckyl::ConfigError, /^\[options\]:.*value is not a Hash$/)
+      lambda{conf = TestJeckyl.new(conf_file)}.should raise_error(Jeckyl::ConfigError, /^\[option_set\]:.*value is not a Hash$/)
     end
 
     it "should raise an exception if it gets an array of strings instead of a integers" do

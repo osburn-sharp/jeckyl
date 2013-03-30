@@ -4,13 +4,19 @@
 
 == History
 
+[jeckyl-0.3.0 29-Mar-2013]
+
+  Beta test. Jeckyl can now process command switches for the same options using optparse.
+  Helper methods moved to a separate module and a couple of new ones added (a_number, a_positive_number).
+  A to_s method added to make it easier to display values.
+
 [jeckyl-0.2.7 15-Nov-2012]
 
   Change base directory for configs to /etc/jerbil consistent with the main jerbil gem
 
 [jeckyl-0.2.6 25-Oct-2012]
 
-  Revert to /etc/jermine while working through changes to over gems
+  Revert to /etc/jermine while working through changes to other gems
 
 [jeckyl-0.2.5 25-Oct-2012]
 

@@ -25,7 +25,7 @@ sieve [2, 5, 7, 10, 15]
 
 # hash of anything
 my_opts = {:peter=>37, :paul=>40, :birds=>true}
-options my_opts
+option_set my_opts
 
 # string formatted as email address
 email "robert@osburn-associates.ath.cx"

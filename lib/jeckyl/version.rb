@@ -1,13 +1,15 @@
 # Created by Jevoom
 #
-# 15-Nov-2012
-#   Change base directory for configs to /etc/jerbil consistent with the main jerbil gem
+# 29-Mar-2013
+#   Beta test. Jeckyl can now process command switches for the same options using optparse.
+#   Helper methods moved to a separate module and a couple of new ones added (a_number, a_positive_number).
+#   A to_s method added to make it easier to display values.
 
 module Jeckyl
-  # version set to 0.2.7
-  Version = '0.2.7'
-  # date set to 15-Nov-2012
-  Version_Date = '15-Nov-2012'
-  #ident string set to: jeckyl-0.2.7 15-Nov-2012
-  Ident = 'jeckyl-0.2.7 15-Nov-2012'
+  # version set to 0.3.0
+  Version = '0.3.0'
+  # date set to 29-Mar-2013
+  Version_Date = '29-Mar-2013'
+  #ident string set to: jeckyl-0.3.0 29-Mar-2013
+  Ident = 'jeckyl-0.3.0 29-Mar-2013'
 end

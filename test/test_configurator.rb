@@ -20,39 +20,73 @@ class TestJeckyl < Jeckyl::Options
   end
   
   def set_log_dir(path)
+    describe 'Directory for log files'
     default '/tmp'
-    comment "Location to write log files to"
+    comment "Writable directory where the app can keep log files"
+    
+    option '-l', '--log-dir [PATH]', String
+    
     a_writable_dir(path)
   end
 
   def set_key_file(path)
-    comment "key file to be used to check secure commands"
+    describe "key file to be used to check secure commands"
+    
+    option '-k', '--key-file [PATH]', String
     a_readable_file(path)
   end
 
   def set_log_level(symb)
     default :verbose
+    
+    describe 'Applications logging level'
     comment "Log level can one of the following:",
        "",
        " * :system - log all important messages and use syslog",
        " * :verbose - be more generous with logging to help resolve problems"
+    
     symbol_set = [:system, :verbose, :debug]
+    
+    option '-L', '--level [SYMBOL]', symbol_set
+    
     a_member_of(symb, symbol_set)
   end
 
   def set_log_rotation(val)
     default 5
-    a_type_of(val, Integer)
-    in_range(val, 0, 20)
+    a_number(val) && a_type_of(val, Integer) && in_range(val, 0, 20)
+    return val
   end
 
   def set_threshold(val)
+    describe "Threshold for things"
     default 5.0
+    
+    option '-T', '--threshold [NUMBER]', Numeric
+    
     # make sure it is a number
     a_type_of(val, Numeric)
     # now make sure it is a float
     in_range(val.to_f, 0.0, 10.0)
 
+  end
+  
+  def set_start_day(day)
+    describe "Day of the week to start from"
+    default 5
+    comment "Can be any number from 1 to 7"
+    
+    a_number(day) && in_range(day, 1, 7)
+    
+  end
+  
+  def set_offset(ofs)
+    describe "Offset from today to previous record"
+    default 1
+    comment "days from today to study"
+    
+    a_positive_number(ofs)
+    
   end
 
   def set_pi(val)
@@ -80,7 +114,7 @@ class TestJeckyl < Jeckyl::Options
     an_array_of(ary, Integer)
   end
 
-  def set_options(opts)
+  def set_option_set(opts)
     default Hash.new
     a_hash(opts)
   end
