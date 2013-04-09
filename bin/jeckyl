@@ -29,6 +29,8 @@ class JeckylCLI < Thor
   
   default_task :usage
   
+  class_option :gem, :aliases=>'-g', :type=>:string, :desc=>'get config classes etc from the given gem'
+  
   desc "usage", "You are looking at it"
   def usage
     puts "Useful tasks for managing Jeckyl config files."

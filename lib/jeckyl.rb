@@ -198,7 +198,8 @@ module Jeckyl
         if me._options.has_key?(key) then
           puts "#"
           puts "# Optparse options for this parameter:"
-          puts "  #{me._options[key].join(", ")}"
+          puts "#  #{me._options[key].join(", ")}"
+          puts "#"
         end
         def_value = me._defaults[key]
         default = def_value.nil? ? '' : def_value.inspect
@@ -238,6 +239,35 @@ module Jeckyl
       ObjectSpace.each_object {|obj| descs << obj if obj.kind_of?(Class) && obj < self}
       descs.sort! {|a,b| a < b ? -1 : 1}
       return descs
+    end
+    
+    # get a config file option from the given command line args
+    #
+    # This is needed with the optparse methods for obvious reasons - the options
+    # can only be parsed once and you may want to parse them with a config file specified
+    # on the command line. This does it the old-fashioned way and strips the option
+    # from the command line arguments.
+    #
+    # Note that the optparse method also includes this option but just for the benefit of --help
+    #
+    # @param [Array] args which should usually be set to ARGV
+    # @param [String] c_file being the path to the config file, which will be
+    #   updated with the command line option if specified.
+    #
+    def self.get_config_opt(args, c_file)
+      #c_file = nil
+      if arg_index = args.index('-c') then
+        # got a -c option so expect a file next
+        c_file = args[arg_index + 1]
+        
+        # check the file exists
+        if c_file && FileTest.readable?(c_file) then
+          # it does so strip the args out
+          args.slice!(arg_index, 2)
+
+        end
+      end
+      return [args, c_file]
     end
     
     
@@ -283,6 +313,10 @@ module Jeckyl
     end
     
     # parse the given command line using the defined options
+    #
+    # @param [Array] args which should usually be ARGV
+    # @yield self and optparse object to allow incidental options to be added
+    # @return false if --help so that the caller can decide what to do (e.g. exit)
     def optparse(args)
       
       # ensure calls to parameter methods do not trample on things
@@ -291,6 +325,8 @@ module Jeckyl
       opts = OptionParser.new
       # get the prefix for parameter methods (once)
       prefix = self.prefix
+      
+      opts.on('-c', '--config-file [FILENAME]', String, 'specify an alternative config file')
       
       # need to define usage etc
       

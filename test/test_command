@@ -21,10 +21,12 @@
 $LOAD_PATH.unshift File.expand_path('../lib', File.dirname(__FILE__))
 
 require 'jeckyl'
-require './test_configurator'
+require './test/test_configurator'
 
 cdir = File.dirname(__FILE__)
 conf_file = File.join(cdir, 'conf.d', 'jeckyl')
+
+args, conf_file = TestJeckyl.get_config_opt(ARGV, conf_file)
 
 options = TestJeckyl.new(conf_file)
 

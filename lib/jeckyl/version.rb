@@ -1,15 +1,14 @@
 # Created by Jevoom
 #
-# 29-Mar-2013
-#   Beta test. Jeckyl can now process command switches for the same options using optparse.
-#   Helper methods moved to a separate module and a couple of new ones added (a_number, a_positive_number).
-#   A to_s method added to make it easier to display values.
+# 09-Apr-2013
+#   Added class method get_config_opt to pre-parse -c cfile from the command line so that
+#   the specified config file can then be used for the rest of the options
 
 module Jeckyl
-  # version set to 0.3.0
-  Version = '0.3.0'
-  # date set to 29-Mar-2013
-  Version_Date = '29-Mar-2013'
-  #ident string set to: jeckyl-0.3.0 29-Mar-2013
-  Ident = 'jeckyl-0.3.0 29-Mar-2013'
+  # version set to 0.3.1
+  Version = '0.3.1'
+  # date set to 09-Apr-2013
+  Version_Date = '09-Apr-2013'
+  #ident string set to: jeckyl-0.3.1 09-Apr-2013
+  Ident = 'jeckyl-0.3.1 09-Apr-2013'
 end

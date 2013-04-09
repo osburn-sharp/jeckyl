@@ -4,6 +4,11 @@
 
 == History
 
+[jeckyl-0.3.1 9-Apr-2013]
+
+  Added class method get_config_opt to pre-parse -c cfile from the command line so that
+  the specified config file can then be used for the rest of the options
+
 [jeckyl-0.3.0 29-Mar-2013]
 
   Beta test. Jeckyl can now process command switches for the same options using optparse.

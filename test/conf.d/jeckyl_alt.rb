@@ -8,17 +8,17 @@ root = File.expand_path('../..', File.dirname(__FILE__))
 log_dir File.join(root, "test")
 
 #should be a valid symbol
-log_level :verbose
+log_level :debug
 
 # should be an integer
-log_rotation 5
+log_rotation 10
 
 # can be a float or any numeric
-threshold 5.6
-threshold 10
+threshold 2.3
+threshold 9.6
 
 # must be a float
-pi 3.14592
+pi 3.1459276
 
 # array of anything
 collection ["names", 1, true ]
@@ -52,4 +52,4 @@ offset 134
 
 start_day 6
 
-
+log_level :debug
