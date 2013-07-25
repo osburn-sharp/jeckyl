@@ -300,11 +300,14 @@ module Jeckyl
     #
     def merge(conf_file)
       
-      self[:config_files] << conf_file
-      
-      # get the values from the config file itself
-      self.instance_eval(File.read(conf_file), conf_file)
-    
+      if conf_file.kind_of?(Hash) then
+        self.merge!(conf_file)
+      else
+        self[:config_files] << conf_file
+        
+        # get the values from the config file itself
+        self.instance_eval(File.read(conf_file), conf_file)
+      end
     rescue SyntaxError => err
       raise ConfigSyntaxError, err.message
     rescue Errno::ENOENT

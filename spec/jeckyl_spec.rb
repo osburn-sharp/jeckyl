@@ -205,6 +205,21 @@ describe "Jeckyl" do
       conf[:config_files].length.should == 2
       conf[:pi].should == 3.14592
     end
+    
+    it "should merge another hash" do
+      conf_file = conf_path + '/jeckyl'
+      conf = TestJeckyl.new(conf_file)
+      merge_file = File.join(conf_path, 'merger.rb')
+      merge = TestJeckyl.new(merge_file)
+      conf.merge(merge)
+      conf[:log_dir].should match(/reports$/)
+      conf[:log_level].should == :debug
+      conf[:log_rotation].should == 6
+      conf[:email].should == "robert@osburn-associates.ath.cx"
+      conf[:config_files].length.should == 1
+      conf[:pi].should == 3.14592
+      
+    end
   end
 
 end

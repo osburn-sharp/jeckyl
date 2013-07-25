@@ -1,14 +1,13 @@
 # Created by Jevoom
 #
-# 09-Apr-2013
-#   Added class method get_config_opt to pre-parse -c cfile from the command line so that
-#   the specified config file can then be used for the rest of the options
+# 25-Jul-2013
+#   Updated merge to merge a hash as well as a file (using Hash#merge!)
 
 module Jeckyl
-  # version set to 0.3.1
-  Version = '0.3.1'
-  # date set to 09-Apr-2013
-  Version_Date = '09-Apr-2013'
-  #ident string set to: jeckyl-0.3.1 09-Apr-2013
-  Ident = 'jeckyl-0.3.1 09-Apr-2013'
+  # version set to 0.3.2
+  Version = '0.3.2'
+  # date set to 25-Jul-2013
+  Version_Date = '25-Jul-2013'
+  #ident string set to: jeckyl-0.3.2 25-Jul-2013
+  Ident = 'jeckyl-0.3.2 25-Jul-2013'
 end

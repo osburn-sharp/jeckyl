@@ -4,6 +4,10 @@
 
 == History
 
+[jeckyl-0.3.2 25-Jul-2013]
+
+  Updated merge to merge a hash as well as a file (using Hash#merge!)
+
 [jeckyl-0.3.1 9-Apr-2013]
 
   Added class method get_config_opt to pre-parse -c cfile from the command line so that

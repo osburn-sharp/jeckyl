@@ -34,7 +34,7 @@ options = TestJeckyl.new(conf_file)
 #   puts key.to_s + ':' + opts.join(', ')
 # end
 
-unless options.optparse(ARGV)
+unless options.optparse(args)
   exit 0
 end
 
