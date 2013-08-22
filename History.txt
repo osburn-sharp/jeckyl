@@ -4,6 +4,10 @@
 
 == History
 
+[jeckyl-0.3.3 22-Aug-2013]
+
+  Set :config_files to an empty array by default
+
 [jeckyl-0.3.2 25-Jul-2013]
 
   Updated merge to merge a hash as well as a file (using Hash#merge!)

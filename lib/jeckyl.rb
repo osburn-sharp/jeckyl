@@ -79,6 +79,8 @@ module Jeckyl
     
       # get the defaults defined in the config parser
       get_defaults(:local=> local, :flag_errors => flag_errors_on_defaults)
+      
+      self[:config_files] = Array.new
     
       return self if config_file.nil?
     

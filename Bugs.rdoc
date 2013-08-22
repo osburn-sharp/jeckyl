@@ -1,6 +1,18 @@
 === BUGS
 
-[jeckyl-0.2.0 20-Sep-2012]
+[jeckyl-0.3.2 22-Aug-2013]
 
-  Nothing yet...
+  Can use a *arg but it fails to get through method_missing. Would be nice if it could?
+
+[jeckyl-0.3.2 26-July-2013]
+
+  When accessing a newly created options hash, it appears that undefined keys do not return nil/false as expected.
+  If the same request is made again the expected nil is returned.
+  
+    force = options[:force_init] # where :force_init is NOT a key
+    => true
+    force_again = options[:force_init]
+    => false
+    
+  Very strange and unexpected behaviour.
 

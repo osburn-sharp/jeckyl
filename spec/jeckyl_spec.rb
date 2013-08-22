@@ -7,6 +7,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../test/test_subclass')
 
 conf_path = File.expand_path(File.dirname(__FILE__) + '/../test/conf.d')
 
+
 describe "Jeckyl" do
 
   # general tests
