@@ -298,6 +298,8 @@ module Jeckyl
     
     # Read, check and merge another parameter file into this one, being of the same config class.
     #
+    # If the file does not exist then silently ignore the merge
+    #
     # @param [String] conf_file - path to file to parse
     #
     def merge(conf_file)
@@ -305,6 +307,9 @@ module Jeckyl
       if conf_file.kind_of?(Hash) then
         self.merge!(conf_file)
       else
+        
+        return unless FileTest.exists?(conf_file)
+        
         self[:config_files] << conf_file
         
         # get the values from the config file itself

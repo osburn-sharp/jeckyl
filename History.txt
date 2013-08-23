@@ -4,6 +4,10 @@
 
 == History
 
+[jeckyl-0.3.4 23-Aug-2013]
+
+  Test for files in merge and ignore if not there
+
 [jeckyl-0.3.3 22-Aug-2013]
 
   Set :config_files to an empty array by default
