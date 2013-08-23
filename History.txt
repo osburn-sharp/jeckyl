@@ -4,6 +4,10 @@
 
 == History
 
+[jeckyl-0.3.5 23-Aug-2013]
+
+  Ensure 1.9 compliance
+
 [jeckyl-0.3.4 23-Aug-2013]
 
   Test for files in merge and ignore if not there
