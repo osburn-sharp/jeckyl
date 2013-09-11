@@ -4,6 +4,10 @@
 
 == History
 
+[jeckyl-0.3.6 11-Sep-2013]
+
+  Added a couple of helpers (an_executable) and removed thor from utility.
+
 [jeckyl-0.3.5 23-Aug-2013]
 
   Ensure 1.9 compliance

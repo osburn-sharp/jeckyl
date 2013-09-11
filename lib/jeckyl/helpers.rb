@@ -41,6 +41,22 @@ module Jeckyl
       end
     end
     
+    # check that the directory is at least readable
+    #
+    # Jeckyl checking method to be used in parameter methods to check the validity of
+    # given parameters, returning the parameter if valid or else raising an exception
+    # which is either ConfigError if the parameter fails the check or ConfigSyntaxError if
+    # the parameter is not validly formed
+    #
+    # @param [String] - path to the directory to be checked
+    def a_readable_dir(path)
+      if FileTest.directory?(path) && FileTest.readable?(path) then
+        path
+      else
+        raise_config_error(path, "directory is not readable or does not exist")
+      end
+    end
+    
     # check parameter is a readable file
     #
     # Jeckyl checking method to be used in parameter methods to check the validity of
@@ -55,6 +71,24 @@ module Jeckyl
         path
       else
         raise_config_error(path, "file does not exist")
+      end
+    end
+    
+    # check parameter is an executable file
+    #
+    # Jeckyl checking method to be used in parameter methods to check the validity of
+    # given parameters, returning the parameter if valid or else raising an exception
+    # which is either ConfigError if the parameter fails the check or ConfigSyntaxError if
+    # the parameter is not validly formed
+    #
+    # @param [String] - path to executable
+    #
+    def an_executable(path)
+      a_readable_file(path)
+      if FileTest.executable?(path) then
+        path
+      else
+        raise_config_error(path, "file is not executable")
       end
     end
     

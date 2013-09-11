@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 #
-# Command Line utilities for Jeckyl
+# Description
 #
 # Author:: Robert Sharp
-# Copyright:: Copyright (c) 2013 Robert Sharp
+# Copyright:: Copyright (c) 2010 Robert Sharp
 # License:: Open Software Licence v3.0
 #
 # This software is licensed for use under the Open Software Licence v. 3.0
@@ -12,34 +12,38 @@
 # must themselves be licensed under the Open Software Licence v. 3.0
 # 
 #
-
-require 'rubygems'
-require 'optplus'
-
+# replace this to point to your config class
+# require 'my_jeckyl_configurator'
+require 'rubygems' # want to find classes that might be in gems
 require 'jeckyl'
 require 'jeckyl/errors'
+require 'thor'
+require 'thor/group'
+require 'colored'
 
-class JeckylCli < Optplus::Parser
+
+
+# the Command Line Interface for jeckyl to allow users to generate
+# config files, generate a simple template or check a config file
+class JeckylCLI < Thor
   
-  usage "action [params] [options]"
+  default_task :usage
   
-  description "Useful utilities for Jeckyl configuration files.",
-    "To find out more, type 'jeckyl readme'"
-    
-  # before_all
+  class_option :gem, :aliases=>'-g', :type=>:string, :desc=>'get config classes etc from the given gem'
   
-  def options(opts)
-    opts.on('-C', '--class Index', Integer, 'select a class by index') do |i|
-      set_option :klass_index, i
-    end
-    opts.on('-k', '--concat', 'concat all classes, starting with the oldest') do
-      set_option :konkat
-    end
+  desc "usage", "You are looking at it"
+  def usage
+    puts "Useful tasks for managing Jeckyl config files."
+    puts ""
+    help
+    puts ""
+    puts "See Also:"
+    puts "  README.md: (see jeckyl readme above)"
+    puts "  GitHub: https://github.com/osburn-sharp/jeckyl"
+    puts "  RubyDoc: http://rdoc.info/github/osburn-sharp/jeckyl/frames"
   end
   
-  # before_actions
-  
-  describe "readme", "display the readme file for the gem"
+  desc "readme", "display the readme file for the gem"
   def readme
     gem_spec = Gem::Specification.find_by_name('jeckyl')
     readme_path = File.join(gem_spec.gem_dir, 'README.md')
@@ -52,36 +56,30 @@ class JeckylCli < Optplus::Parser
 
   end
   
-  describe "list", "list all the config classes involved in a given class"
-  def list
-    cfile = next_argument_or_error("missing config class")
+  desc "list", "list all the config classes involved in a given class"
+  def list(cfile)
     require cfile
     classes = Jeckyl::Options.descendants
     display_classes(classes)
   rescue LoadError
     puts "Error: could not load #{cfile}".red.bold
   end
-  help :list, "Show a list of this config class and its ancestors",
-    "This is useful when you have create a config class from a parent class",
-    "in order to include the parent classes' parameters.",
-    "The list is indexed and the index can be used in other actions,",
-    "include 'jeckyl config'."
     
   
-  
-  describe "config", "generate config file for the given config class"
-  def config
-    cfile = next_argument_or_error("You must provide a config class")
+  desc "config", "generate config file for the given config class"
+  method_option :class, :aliases=>'-C', :type=>:numeric, :desc=>'select class by index'
+  method_option :concat, :aliases=>'-k', :desc=>'concat all classes, starting with the oldest'
+  def config(cfile, my_class_name=nil)
+    
     require cfile # catch LoadError if cfile does not load
     
-    my_class_index = get_option(:klass_index) || 0 
-    my_class_index -= 1 if my_class_index > 0
+    my_class_index = options[:class] || 0 
+    my_class_index += -1 if my_class_index > 0
     
-    konkat = get_option :konkat
     
     classes = Jeckyl::Options.descendants
     
-    if !konkat && classes[my_class_index].nil? then
+    if options[:concat].nil? && classes[my_class_index].nil? then
       $stderr.puts "Index #{my_class_index + 1} is invalid. Please select a valid index".red.bold
       display_classes(classes)
       return false
@@ -90,7 +88,7 @@ class JeckylCli < Optplus::Parser
     $stderr.puts "There are #{classes.length} sets of configs, use 'jeckyl list' to list them or -k to generate them all".yellow if classes.length > 1
     
     my_classes = []
-    if konkat then
+    if options[:concat] then
       classes.each_index {|i| my_classes.unshift i}
     else
       my_classes << my_class_index
@@ -104,7 +102,7 @@ class JeckylCli < Optplus::Parser
       classes[ci].generate_config(true)
     end
     
-    unless konkat || classes.length == 1
+    unless options[:concat] || classes.length == 1
       puts ""
       puts "# There are also parameters in:"
       classes.each do |klass|
@@ -113,24 +111,11 @@ class JeckylCli < Optplus::Parser
     end
 
   rescue LoadError
-    if cfile.nil? then
-      puts "Error: you need to specify a configration file".red.bold
-    else
-      puts "Error: could not load #{cfile}".red.bold
-    end
+    puts "Error: could not load #{cfile}".red.bold
   end
-  help :config, "Outputs a default config file for the given class.",
-    "Use this to create a default file that you can then tailor for",
-    "specific settings. If there is more than one class involved use",
-    "-k to create an output with all the config parameters included.",
-    "Output is to stdout and can easily be redirected to a file as needed."
   
-  
-  
-  describe "klass", "generate a simple class template"
-  def klass
-    name = next_argument_or_error("missing class name")
-    parent = next_argument_or('Jeckyl::Config')
+  desc "klass", "generate a simple class template"
+  def klass(name, parent="Jeckyl::Config")
     puts <<EOTXT
 # Simple framework for defining Jeckyl options to put into a config hash
 
@@ -152,19 +137,12 @@ module #{name}
   end
 end
 EOTXT
-
+    
   end
-  help :klass, "Generate a simple class file as a template for defining your",
-    "own parameters. You can also specify a class to inherit if you want to",
-    "pick up additional parameters. Otherwise the parent will default to",
-    "Jeckyl::Config. Alternatives include Jellog::Config and JerbilService::Config."
         
   
-  describe "check", "check the given config file is valid for the given class"
+  desc "check", "check the given config file is valid for the given class"
   def check(klass_file, conf_file)
-    
-    klass_file = next_argument_or_error("missing class name")
-    conf_file = next_argument_or_error("missing config file")
     
     require klass_file # catch LoadError if cfile does not load
     
@@ -177,27 +155,23 @@ EOTXT
 
   rescue LoadError
     puts "Error: could not load #{cfile}".red
-
-  end
-  help :check, "Use the given class (which must be requirable) and check",
-    "that the given config file is OK or show errors if not.",
-    "Useful way to check that a config file works before using it in earnest."
-  
-  
-  describe "markdown", "display the comments from a class in markdown format"
-  def markdown
     
-    cfile = next_argument_or_error("missing class")
+  end
+  
+  desc "markdown", "display the comments from a class in markdown format"
+  method_option :class, :aliases=>'-C', :type=>:numeric, :desc=>'select class by index'
+  method_option :concat, :aliases=>'-k', :desc=>'concat all classes, starting with the oldest'
+  def markdown(cfile)
     
     require cfile # catch LoadError if cfile does not load
     
-    my_class_index = get_option(:klass_index) || 0 
-    my_class_index -= 1 if my_class_index > 0
-    konkat = get_option :konkat
+    my_class_index = options[:class] || 0 
+    my_class_index += -1 if my_class_index > 0
+    
     
     classes = Jeckyl::Options.descendants
     
-    if !konkat && classes[my_class_index].nil? then
+    if options[:concat].nil? && classes[my_class_index].nil? then
       $stderr.puts "Index #{my_class_index + 1} is invalid. Please select a valid index".red.bold
       display_classes(classes)
       return false
@@ -206,7 +180,7 @@ EOTXT
     $stderr.puts "There are #{classes.length} sets of configs, use 'jeckyl list' to list them or -k to generate them all".yellow if classes.length > 1
     
     my_classes = []
-    if konkat then
+    if options[:concat] then
       classes.each_index {|i| my_classes << i}
     else
       my_classes << my_class_index
@@ -253,7 +227,7 @@ EOTXT
       end
     end
     
-    unless konkat || classes.length == 1
+    unless options[:concat] || classes.length == 1
       puts ""
       puts "## See Also"
       puts ""
@@ -268,11 +242,8 @@ EOTXT
     puts "Error: could not load #{cfile}".red
     
   end
-  help :markdown, "Similar to config but instead of creating the config file itself",
-    "this creates a markdown file that can be used in rdoc to describe the config",
-    "parameters."
   
-
+  no_tasks do
   def display_classes(classes)
     $stderr.puts "The following classes are available:".green
     count = 1
@@ -281,9 +252,8 @@ EOTXT
       count += 1
     end
   end
+  end
 
-
-  
 end
 
-JeckylCli.run!
+JeckylCLI.start
