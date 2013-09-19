@@ -4,6 +4,10 @@
 
 == History
 
+[jeckyl-0.3.7 19-Sep-2013]
+
+  Corrected some minor yard issues
+  
 [jeckyl-0.3.6 11-Sep-2013]
 
   Added a couple of helpers (an_executable) and removed thor from utility.

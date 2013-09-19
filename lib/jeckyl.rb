@@ -403,7 +403,7 @@ module Jeckyl
     
     # create a description for the current parameter, to be used when generating a config template
     #
-    # @param [*String] being one or more string arguments that are used to generate config file templates
+    # @param [*String] strings being one or more string arguments that are used to generate config file templates
     #  and documents
     def comment(*strings)
       @_comments[@_last_symbol] = strings unless @_last_symbol.nil?
@@ -419,14 +419,14 @@ module Jeckyl
     
     # set optparse options for the parameter
     #
-    # @param [Array] options using the same format as optparse
+    # @param [Array] opts - options using the same format as optparse
     def option(*opts)
       @_options[@_last_symbol] = opts unless @_last_symbol.nil?
     end
     
     # set optparse description for the parameter
     #
-    # @param [Array] options using the same format as optparse
+    # @param [Array] str - options using the same format as optparse
     def describe(str)
       @_descriptions[@_last_symbol] = str unless @_last_symbol.nil?
     end

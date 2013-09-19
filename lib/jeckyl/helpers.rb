@@ -31,7 +31,7 @@ module Jeckyl
     # which is either ConfigError if the parameter fails the check or ConfigSyntaxError if
     # the parameter is not validly formed
     #
-    # @param [String] - path
+    # @param [String] path to directory
     #
     def a_writable_dir(path)
       if FileTest.directory?(path) && FileTest.writable?(path) then
@@ -48,7 +48,7 @@ module Jeckyl
     # which is either ConfigError if the parameter fails the check or ConfigSyntaxError if
     # the parameter is not validly formed
     #
-    # @param [String] - path to the directory to be checked
+    # @param [String] path to the directory to be checked
     def a_readable_dir(path)
       if FileTest.directory?(path) && FileTest.readable?(path) then
         path
@@ -64,7 +64,7 @@ module Jeckyl
     # which is either ConfigError if the parameter fails the check or ConfigSyntaxError if
     # the parameter is not validly formed
     #
-    # @param [String] - path to file
+    # @param [String] path to file
     #
     def a_readable_file(path)
       if FileTest.readable?(path) then
@@ -81,7 +81,7 @@ module Jeckyl
     # which is either ConfigError if the parameter fails the check or ConfigSyntaxError if
     # the parameter is not validly formed
     #
-    # @param [String] - path to executable
+    # @param [String] path to executable
     #
     def an_executable(path)
       a_readable_file(path)
@@ -102,7 +102,7 @@ module Jeckyl
     # the parameter is not validly formed
     #
     # @param [Object] obj to check type of
-    # @param [Class] type, being a class constant such as Numeric, String
+    # @param [Class] type being a class constant such as Numeric, String
     #
     def a_type_of(obj, type)
       if obj.kind_of?(type) then
