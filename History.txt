@@ -4,6 +4,11 @@
 
 == History
 
+[jeckyl-0.3.8 24-Jun-2014]
+
+  Added compound names to klass action for 'jeckyl' command, used to generate class
+  files
+
 [jeckyl-0.3.7 19-Sep-2013]
 
   Corrected some minor yard issues

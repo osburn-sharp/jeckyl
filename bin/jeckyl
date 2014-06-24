@@ -130,17 +130,20 @@ class JeckylCli < Optplus::Parser
   describe "klass", "generate a simple class template"
   def klass
     name = next_argument_or_error("missing class name")
+    names = name.split("::")
+    mod_name = names[0]
+    class_name = names[1] || 'Config'
     parent = next_argument_or('Jeckyl::Config')
     puts <<EOTXT
 # Simple framework for defining Jeckyl options to put into a config hash
 
-module #{name}
+module #{mod_name}
   
   # configuration parameters for #{name} 
   #
   # @see file:<PATH_TO_CONFIG_MARKDOWN_FILE> #{name} Parameter Descriptions
   #
-  class Config < #{parent}
+  class #{class_name} < #{parent}
     
     def configure_a_parameter(val)
       default "default"
@@ -154,10 +157,14 @@ end
 EOTXT
 
   end
-  help :klass, "Generate a simple class file as a template for defining your",
-    "own parameters. You can also specify a class to inherit if you want to",
-    "pick up additional parameters. Otherwise the parent will default to",
-    "Jeckyl::Config. Alternatives include Jellog::Config and JerbilService::Config."
+  help :klass, "  jeckyl klass <name> [<parent_class>}]",
+    "",
+    "Generate a simple class file as a template for defining your",
+    "own parameters. You can also specify a class to inherit if you want as",
+    "an additional parameter. Otherwise the parent will default to",
+    "Jeckyl::Config. Alternatives include Jellog::Config and JerbilService::Config.",
+    "Note the class name can be compound and will be split into module and class.",
+    "For example: 'Module::Class'."
         
   
   describe "check", "check the given config file is valid for the given class"

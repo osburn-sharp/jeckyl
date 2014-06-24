@@ -1,14 +1,14 @@
 # Created by Jevoom
 #
-# 19-Sep-2013
-#   Corrected some minor yard issues
-#   
+# 24-Jun-2014
+#   Added compound names to klass action for 'jeckyl' command, used to generate class
+#   files
 
 module Jeckyl
-  # version set to 0.3.7
-  Version = '0.3.7'
-  # date set to 19-Sep-2013
-  Version_Date = '19-Sep-2013'
-  #ident string set to: jeckyl-0.3.7 19-Sep-2013
-  Ident = 'jeckyl-0.3.7 19-Sep-2013'
+  # version set to 0.3.8
+  Version = '0.3.8'
+  # date set to 24-Jun-2014
+  Version_Date = '24-Jun-2014'
+  #ident string set to: jeckyl-0.3.8 24-Jun-2014
+  Ident = 'jeckyl-0.3.8 24-Jun-2014'
 end
