@@ -385,17 +385,19 @@ module Jeckyl
     def to_s(opts={})
       keys = self.keys.collect {|k| k.to_s}
       cols = 0
+      strs = Array.new
       keys.each {|k| cols = k.length if k.length > cols}
       keys.sort.each do |key_s|
-        print '  '
-        print key_s.ljust(cols)
+        str = '  '
+        str << key_s.ljust(cols)
         key = key_s.to_sym
         desc = @_descriptions[key]
         value = self[key].inspect
-        print ": #{value}"
-        print " (#{desc})" unless desc.nil?
-        puts
+        str << ": #{value}"
+        str << " (#{desc})" unless desc.nil?
+        strs << str
       end
+      return strs.join("\n")
     end
     
     

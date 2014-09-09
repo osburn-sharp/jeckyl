@@ -4,6 +4,10 @@
 
 == History
 
+[jeckyl-0.3.9 27-Jun-2014]
+
+  Fix #to_s to return a string and not output!
+
 [jeckyl-0.3.8 24-Jun-2014]
 
   Added compound names to klass action for 'jeckyl' command, used to generate class
