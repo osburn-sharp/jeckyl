@@ -4,6 +4,10 @@
 
 == History
 
+[jeckyl-0.4.0 01-Oct-2014]
+
+  General tidy up of gem (README, rspec tests etc) to bring things up to date.
+
 [jeckyl-0.3.9 27-Jun-2014]
 
   Fix #to_s to return a string and not output!

@@ -14,5 +14,6 @@
     force_again = options[:force_init]
     => false
     
-  Very strange and unexpected behaviour.
+  Very strange and unexpected behaviour, but it does not happen very often. Unable to reproduce 
+  in controlled conditions.
 

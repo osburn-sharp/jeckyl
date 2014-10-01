@@ -13,7 +13,7 @@
 # 
 #
 
-require 'rubygems'
+#require 'rubygems' # not required in ruby 1.9.3 +
 require 'optplus'
 
 require 'jeckyl'

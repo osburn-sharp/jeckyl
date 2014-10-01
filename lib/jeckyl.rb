@@ -327,7 +327,7 @@ module Jeckyl
     # @param [Array] args which should usually be ARGV
     # @yield self and optparse object to allow incidental options to be added
     # @return false if --help so that the caller can decide what to do (e.g. exit)
-    def optparse(args)
+    def optparse(args=ARGV)
       
       # ensure calls to parameter methods do not trample on things
       @_last_symbol = nil
@@ -344,13 +344,6 @@ module Jeckyl
       @_options.each_pair do |param, options|
         
         options << @_descriptions[param] if @_descriptions.has_key?(param)
-        
-        # opt_str = ''
-        # options.each do |os|
-        #   opt_str << os.inspect
-        # end
-        
-        # puts "#{param}: #{opt_str}"
         
         # get the method itself to call with the given arg
         pref_method = self.method("#{prefix}_#{param}".to_sym)

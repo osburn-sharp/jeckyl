@@ -1,13 +1,13 @@
 # Created by Jevoom
 #
-# 27-Jun-2014
-#   Fix #to_s to return a string and not output!
+# 01-Oct-2014
+#   General tidy up of gem (README, rspec tests etc) to bring things up to date.
 
 module Jeckyl
-  # version set to 0.3.9
-  Version = '0.3.9'
-  # date set to 27-Jun-2014
-  Version_Date = '27-Jun-2014'
-  #ident string set to: jeckyl-0.3.9 27-Jun-2014
-  Ident = 'jeckyl-0.3.9 27-Jun-2014'
+  # version set to 0.4.0
+  Version = '0.4.0'
+  # date set to 01-Oct-2014
+  Version_Date = '01-Oct-2014'
+  #ident string set to: jeckyl-0.4.0 01-Oct-2014
+  Ident = 'jeckyl-0.4.0 01-Oct-2014'
 end

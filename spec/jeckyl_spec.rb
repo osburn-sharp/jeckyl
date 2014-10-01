@@ -29,7 +29,7 @@ describe "Jeckyl" do
     conf[:log_level].should == :verbose
     conf[:log_rotation].should == 5
     conf[:email].should == "robert@osburn-sharp.ath.cx"
-    conf.has_key?(:sieve).should be_true
+    conf.has_key?(:sieve).should be true
     conf[:config_files].length.should == 1
     conf[:option_set][:peter].should == 37
     conf[:offset].should == 134
@@ -185,12 +185,12 @@ describe "Jeckyl" do
       opts.length.should == 4
       subopts = Aclass.intersection(opts)
       subopts.length.should ==2
-      subopts.has_key?(:a_bool).should be_true
-      subopts.has_key?(:no_def).should be_true
+      subopts.has_key?(:a_bool).should be true
+      subopts.has_key?(:no_def).should be true
       opts.complement(subopts)
       opts.length.should == 2
-      opts.has_key?(:config_files).should be_true
-      opts.has_key?(:another).should be_true
+      opts.has_key?(:config_files).should be true
+      opts.has_key?(:another).should be true
     end
   end
   
